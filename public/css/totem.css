@@ -1,0 +1,138 @@
+/* Estilos generales para el tótem */
+.totem-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  padding: 20px;
+}
+
+.totem-card {
+  width: 100%;
+  max-width: 800px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para el teclado táctil */
+.touch-keyboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.keyboard-key {
+  padding: 20px 10px;
+  font-size: 24px;
+  border: none;
+  border-radius: 10px;
+  background-color: #e9ecef;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.keyboard-key:active, 
+.keyboard-key.active {
+  transform: scale(0.95);
+  background-color: #d0d3d6;
+}
+
+.keyboard-key.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.keyboard-key.btn-success:active,
+.keyboard-key.btn-success.active {
+  background-color: #218838;
+}
+
+.keyboard-key.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.keyboard-key.btn-danger:active,
+.keyboard-key.btn-danger.active {
+  background-color: #c82333;
+}
+
+/* Estilos para el input */
+#rutInput {
+  font-size: 2rem !important;
+  letter-spacing: 2px;
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+}
+
+#rutInput:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Media queries para diferentes tamaños de pantalla */
+@media (max-width: 768px) {
+  .keyboard-key {
+      padding: 15px 10px;
+      font-size: 20px;
+  }
+  
+  #rutInput {
+      font-size: 1.5rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .keyboard-key {
+      padding: 12px 8px;
+      font-size: 18px;
+  }
+  
+  .touch-keyboard {
+      gap: 10px;
+  }
+  /* Mejoras para la respuesta táctil */
+.keyboard-key {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.keyboard-key:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+}
+
+.keyboard-key:active:after,
+.keyboard-key.active:after {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+      transform: scale(0, 0);
+      opacity: 0.5;
+  }
+  100% {
+      transform: scale(20, 20);
+      opacity: 0;
+  }
+}
+}

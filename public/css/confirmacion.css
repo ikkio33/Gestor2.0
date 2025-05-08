@@ -1,0 +1,35 @@
+.confirm-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f6f8;
+    text-align: center;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.confirm-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.confirm-card h2 {
+    color: #28a745;
+    margin-bottom: 1rem;
+}
+
+.confirm-card .display-code {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 1rem 0;
+}
+
+.confirm-card p {
+    margin-bottom: 1.5rem;
+    color: #555;
+}

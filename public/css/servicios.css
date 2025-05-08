@@ -1,0 +1,30 @@
+.container {
+    padding: 0 1rem;
+}
+
+.text-primary {
+    font-size: 1.75rem;
+}
+
+.card-header {
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+.card-body .btn {
+    margin-bottom: 0.5rem;
+}
+
+
+.accordion-item {
+    border: none;
+}
+.accordion-button {
+    background-color: #e9ecef;
+}
+.accordion-button:not(.collapsed) {
+    background-color: #d1e7fd;
+}
+
+
+@media (max-width: 768px) {
+    .col-md-4 { width: 100%; }
+}

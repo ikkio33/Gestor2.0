@@ -1,0 +1,53 @@
+body {
+    background-color: #000;
+    color: #0f0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2rem;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+header {
+    background-color: #111;
+    padding: 20px;
+    text-align: center;
+    font-size: 2.5rem;
+    color: #0ff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 20px;
+    text-align: center;
+}
+
+th {
+    background-color: #222;
+    color: #0ff;
+    font-size: 1.5rem;
+}
+
+tr:nth-child(even) {
+    background-color: #111;
+}
+
+tr:nth-child(odd) {
+    background-color: #000;
+}
+
+.meson {
+    font-weight: bold;
+    color: #f90;
+}
+
+.turno {
+    color: #0f0;
+    font-size: 2rem;
+}
+
