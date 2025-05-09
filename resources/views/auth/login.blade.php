@@ -1,33 +1,44 @@
 <!DOCTYPE html>
-<html>
-    <link rel="stylesheet" href="">
+<html lang="es">
+
 <head>
+    <meta charset="UTF-8">
     <title>Iniciar sesión</title>
+    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 </head>
+
 <body>
-    <h1>Login</h1>
+    <div class="container">
+        <div class="sidebar">
 
-    @if ($errors->any())
-        <div style="color: red;">
-            <ul>
-                @foreach ($errors->all() as $error)
+            <div class="logo-container">
+                <img src="{{ asset('img/logo.png') }}" alt="Logo de Gesnot" class="logo">
+            </div>
+            <h1>Iniciar Sesión</h1>
+
+            @if ($errors->any())
+            <div class="error">
+                <ul>
+                    @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+                    @endforeach
+                </ul>
+            </div>
+            @endif
 
-    <form method="POST" action="{{ route('login.submit') }}">
-        @csrf
-        <div>
-            <label for="nombre">Usuario:</label>
-            <input type="text" name="nombre" id="nombre" required>
+            <form method="POST" action="{{ route('login.submit') }}">
+                @csrf
+                <label for="nombre">Usuario:</label>
+                <input type="text" name="nombre" id="nombre" required>
+
+                <label for="password">Contraseña:</label>
+                <input type="password" name="password" id="password" required>
+
+                <button type="submit">Entrar</button>
+            </form>
         </div>
-        <div>
-            <label for="password">Contraseña:</label>
-            <input type="password" name="password" id="password" required>
-        </div>
-        <button type="submit">Entrar</button>
-    </form>
+        <div class="content-bg"></div>
+    </div>
 </body>
+
 </html>

@@ -1,5 +1,5 @@
 @section('styles')
-<link href="{{ asset('css/vista.css') }}" rel="stylesheet"
+<link href="{{ asset('css/vista.css') }}" rel="stylesheet">
 <link href="{{ asset('js/vista.js') }}" rel="stylesheet">
 @endsection
 

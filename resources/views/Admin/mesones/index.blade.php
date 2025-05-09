@@ -26,7 +26,7 @@
 
     <div class="table-responsive">
         <table class="table table-bordered align-middle table-hover">
-            <thead class="table-light">
+            <thead class="custom-thead">
                 <tr>
                     <th>Nombre</th>
                     <th>Estado</th>

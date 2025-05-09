@@ -10,8 +10,8 @@
 
     <a href="{{ route('Admin.usuarios.create') }}" class="btn btn-primary mb-3">Nuevo Usuario</a>
     <div class="table-responsive">
-        <table class="table table-bordered table-striped align-middle text-center">
-            <thead class="table-dark">
+        <table class="table table-bordered table-striped table hover align-middle text-center ">    
+            <thead class="custom-thead">
                 <tr>
                     <th>Nombre</th>
                     <th>Correo</th>

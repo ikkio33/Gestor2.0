@@ -1,35 +1,89 @@
-body {
-    background: url('/images/fondo-login.jpg') no-repeat center center fixed;
-    background-size: cover;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    height: 100%;
     font-family: 'Segoe UI', sans-serif;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 30%;
+    background-color: #f4f4f4;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo {
+    max-width: 150px; 
+    height: auto;
+}
+
+.sidebar h1 {
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: #004080;
+}
+
+.sidebar form {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar label {
+    margin-top: 1rem;
+    font-weight: bold;
     color: #333;
 }
 
-.login-container {
-    max-width: 400px;
-    margin: 80px auto;
-    padding: 30px;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.sidebar input {
+    padding: 0.6rem;
+    margin-top: 0.3rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-.login-container h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #2c3e50;
-}
-
-.login-container .form-control {
-    margin-bottom: 15px;
-}
-
-.login-container .btn-primary {
-    width: 100%;
-    background-color: #007bff;
+.sidebar button {
+    margin-top: 2rem;
+    padding: 0.8rem;
+    background-color: #004080;
+    color: white;
     border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
-.login-container .btn-primary:hover {
-    background-color: #0056b3;
+.sidebar button:hover {
+    background-color: #003366;
+}
+
+.error {
+    background-color: #ffe5e5;
+    border: 1px solid #ff0000;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    color: #cc0000;
+}
+
+.content-bg {
+    flex: 1;
+    background: url('../img/01fd357a-4be3-570e-79d8-22611500c641.jpg') no-repeat center center;
+    background-size: cover;
 }

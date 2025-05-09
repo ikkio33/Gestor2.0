@@ -1,0 +1,68 @@
+body, html {
+    margin: 0;
+    height: 100%;
+    font-family: system-ui, Segoe UI, sans-serif;
+    background-color: #f5f6fa;
+}
+.custom-thead th{
+    background-color: #1c3c6a !important; 
+    color: white !important;
+    font-weight: bold;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+#wrapper {
+    display: flex;
+}
+
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+    background-color: #2a579a;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+.sidebar .logo-container {
+    background-color: white;
+    padding: 10px;
+    border-radius: 12px;
+    display: inline-block;
+    margin: 1rem auto;
+    text-align: center;
+}
+
+.sidebar .logo {
+    width: 80px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.sidebar .nav-link {
+    color: #dce3f1;
+    padding: 0.6rem 1rem;
+    border-radius: 0.25rem;
+    transition: background 0.2s;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background-color: #1d3f73;
+    color: #fff;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    padding: 0;
+    visibility: hidden;
+}
+
+.content {
+    transition: margin-left 0.3s ease;
+    width: 100%;
+}
+
+#toggleSidebar {
+    position: relative;
+    z-index: 1001;
+}
+
