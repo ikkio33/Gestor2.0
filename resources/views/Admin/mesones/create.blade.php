@@ -34,10 +34,11 @@
             @endforeach
         </div>
 
-        <button type="submit" class="btn btn-success">Guardar</button>
-        
-        <a href="{{ route('Admin.mesones.index') }}" class="btn btn-secondary">Cancelar</a>
-        
+        <button type="submit" class="btn btn-guardar">Guardar</button>
+
+        <a href="{{ route('Admin.mesones.index') }}" class="btn btn-cancelar">Cancelar</a>
+
+
     </form>
 </div>
 @endsection

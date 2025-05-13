@@ -8,7 +8,6 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <!-- Sección para asignar mesón -->
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
             <h3>Asignar Mesón</h3>
@@ -33,7 +32,6 @@
         </div>
     </div>
 
-    <!-- Sección de mesones asignados -->
     <div class="card">
         <div class="card-header bg-info text-white">
             <h3>Mesones en Uso</h3>

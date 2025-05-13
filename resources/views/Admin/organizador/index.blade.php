@@ -18,7 +18,7 @@
         @csrf
         <div class="input-group">
             <input type="text" name="nombre" class="form-control" placeholder="Nombre del servicio" required>
-            <button class="btn btn-primary">Agregar Servicio</button>
+            <button class="btn btn-primary">Agregar Servicio</button>   
         </div>
     </form>
 
@@ -31,7 +31,7 @@
                     <form action="{{ route('Admin.organizador.deleteServicio', $servicio->id) }}" method="POST" onsubmit="return confirm('¿Eliminar servicio?')">
                         @csrf
                         @method('DELETE')
-                        <button class="btn btn-sm btn-danger">X</button>
+                        <button class="btn-accion btn-eliminar btn-sm px-2 py-1">X</button>
                     </form>
                 </div>
                 <ul class="list-group list-group-flush materia-list" data-servicio-id="{{ $servicio->id }}">
@@ -41,7 +41,7 @@
                         <form action="{{ route('Admin.organizador.deleteMateria', $materia->id) }}" method="POST" class="m-0 p-0">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">X</button>
+                            <button class="btn-accion btn-eliminar btn-sm px-2 py-1">X</button>
                         </form>
                     </li>
                     @endforeach
@@ -52,7 +52,7 @@
                         <input type="hidden" name="servicio_id" value="{{ $servicio->id }}">
                         <div class="input-group">
                             <input type="text" name="nombre" class="form-control" placeholder="Nueva materia" required>
-                            <button class="btn btn-success">+</button>
+                            <button class="btn-accion btn-guardar px-3">+</button>
                         </div>
                     </form>
                 </div>

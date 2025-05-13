@@ -10,7 +10,7 @@
 
     <a href="{{ route('Admin.usuarios.create') }}" class="btn btn-primary mb-3">Nuevo Usuario</a>
     <div class="table-responsive">
-        <table class="table table-bordered table-striped table hover align-middle text-center ">    
+        <table class="table table-bordered table-striped table hover align-middle text-center ">
             <thead class="custom-thead">
                 <tr>
                     <th>Nombre</th>
@@ -26,13 +26,13 @@
                     <td>{{ $usuario->email }}</td>
                     <td>{{ ucfirst($usuario->rol) }}</td>
                     <td>
-                        <a href="{{ route('Admin.usuarios.show', $usuario->id) }}" class="btn btn-info btn-sm">Ver</a>
-                        <a href="{{ route('Admin.usuarios.edit', $usuario->id) }}" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="{{ route('Admin.usuarios.show', $usuario->id) }}" class="btn btn-ver btn-sm">Ver</a>
+                        <a href="{{ route('Admin.usuarios.edit', $usuario->id) }}" class="btn btn-editar btn-sm">Editar</a>
 
                         <form action="{{ route('Admin.usuarios.destroy', $usuario->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-danger">Eliminar</button>
+                            <button class="btn btn-sm btn-danger btn-sm">Eliminar</button>
                         </form>
                     </td>
                 </tr>

@@ -41,29 +41,28 @@
                     <td>{{ $meson->nombre }}</td>
                     <td>{{ $meson->estado }}</td>
                     <td>
-                        <span class="badge bg-{{ $meson->disponible ? 'success' : 'danger' }}">
+                        <span class="badge {{ $meson->disponible ? 'badge-disponible' : 'badge-no-disponible' }}">
                             {{ $meson->disponible ? 'Sí' : 'No' }}
                         </span>
                     </td>
                     <td>
                         @if ($meson->servicios)
                         @foreach (explode(',', $meson->servicios) as $servicio)
-                        <span class="badge bg-info text-dark">{{ trim($servicio) }}</span>
+                        <span class="badge badge-servicio">{{ trim($servicio) }}</span>
                         @endforeach
                         @else
-                        <span class="badge bg-warning text-dark">Sin servicios</span>
+                        <span class="badge badge-sin-servicio">Sin servicios</span>
                         @endif
                     </td>
                     <td>
-                        <a href="{{ route('Admin.mesones.edit', $meson) }}" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="{{ route('Admin.mesones.edit', $meson) }}" class="btn btn-sm btn-editar">Editar</a>
 
                         <form action="{{ route('Admin.mesones.destroy', $meson->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Estás seguro de eliminar este mesón?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                            <button type="submit" class="btn btn-sm btn-eliminar">Eliminar</button>
                         </form>
                     </td>
-
                 </tr>
                 @empty
                 <tr>

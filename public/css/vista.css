@@ -45,6 +45,21 @@ h1 {
 .turno-box:nth-child(n+7) {
     display: none !important;
 }
+.no-turnos-box {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 2rem;
+    border: 2px dashed hsl(208, 8%, 59%);
+    border-radius: 5rem;
+    background-color: #ffffff;
+    color: #6c757d;
+    text-align: center;
+    font-size: 1.8rem;
+    box-shadow: 0 2px 6px hsla(0, 0%, 0%, 0.904);
+    animation: fadeInUp 1s ease;
+}
+
+
 
 @keyframes fadeInUp {
     from {

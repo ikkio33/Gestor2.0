@@ -23,8 +23,11 @@
         @endforeach
     </div>
     @else
-    <p class="text-center text-muted fs-3">No hay turnos en atención en este momento.</p>
+    <div class="no-turnos-box">
+        <p>No hay turnos en atención en este momento.</p>
+    </div>
     @endif
+
 </div>
 
 @if ($nuevoTurno)

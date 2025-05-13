@@ -53,11 +53,11 @@
             </ul>
         </div>
 
-        <div class="content flex-grow-1">
-            <button id="toggleSidebar" class="btn btn-outline-primary m-2">
-                <i class="bi bi-list"></i>
-            </button>
+        <button id="toggleSidebar" class="toggle-btn">
+            <i class="bi bi-list"></i>
+        </button>
 
+        <div class="content flex-grow-1">
             <div class="p-3">
                 @yield('content')
             </div>

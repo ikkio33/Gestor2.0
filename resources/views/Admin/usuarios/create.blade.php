@@ -41,7 +41,7 @@
             </select>
         </div>
 
-        <button type="submit" class="btn btn-primary">Guardar Usuario</button>
+        <button type="submit" class="btn btn-guardar">Guardar Usuario</button>
         <a href="{{ route('Admin.usuarios.index') }}" class="btn btn-secondary">Volver</a>
     </form>
     
