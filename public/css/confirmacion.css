@@ -1,35 +1,70 @@
 .confirm-wrapper {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: 100vh;
-    background-color: #f4f6f8;
-    text-align: center;
-    padding: 1rem;
+    justify-content: center;
+    min-height: 60vh;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #f9f9f9;
+    padding: 20px;
     box-sizing: border-box;
+    text-align: center;
 }
 
 .confirm-card {
-    background: #fff;
-    padding: 2rem;
+    background: white;
+    border: 2px solid #007bff;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    padding: 30px 40px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
     max-width: 400px;
     width: 100%;
 }
 
 .confirm-card h2 {
-    color: #28a745;
-    margin-bottom: 1rem;
+    color: #007bff;
+    margin-bottom: 25px;
+    font-weight: bold;
+    font-size: 1.8rem;
 }
 
-.confirm-card .display-code {
-    font-size: 3rem;
-    font-weight: bold;
-    margin: 1rem 0;
+.display-code {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #222;
+    letter-spacing: 0.15em;
+    margin-bottom: 20px;
+    border: 3px dashed #007bff;
+    padding: 15px 0;
+    user-select: all; /* para que puedan copiar el código si quieren */
 }
 
 .confirm-card p {
-    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
     color: #555;
+    margin-bottom: 0;
+}
+
+@media print {
+    .confirm-wrapper {
+        background: white !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        min-height: auto !important;
+    }
+
+    .confirm-card {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .display-code {
+        border: none !important;
+        font-size: 4rem !important;
+        color: black !important;
+        letter-spacing: 0.2em !important;
+    }
 }

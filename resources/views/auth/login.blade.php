@@ -17,7 +17,8 @@
             <h1>Iniciar Sesión</h1>
 
             @if ($errors->any())
-            <div class="error">
+            <div class="alert alert-danger">
+                <strong>¡Error!</strong> Las credenciales proporcionadas son incorrectas.
                 <ul>
                     @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -28,13 +29,17 @@
 
             <form method="POST" action="{{ route('login.submit') }}">
                 @csrf
-                <label for="nombre">Usuario:</label>
-                <input type="text" name="nombre" id="nombre" required>
+                <div class="form-group">
+                    <label for="nombre">Usuario:</label>
+                    <input type="text" name="nombre" id="nombre" class="form-control" required>
+                </div>
 
-                <label for="password">Contraseña:</label>
-                <input type="password" name="password" id="password" required>
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" name="password" id="password" class="form-control" required>
+                </div>
 
-                <button type="submit">Entrar</button>
+                <button type="submit" class="btn btn-primary">Entrar</button>
             </form>
         </div>
         <div class="content-bg"></div>

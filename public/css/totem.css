@@ -20,18 +20,18 @@
 .touch-keyboard {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  gap: 45px;
   margin-top: 20px;
 }
 
 .keyboard-key {
   padding: 20px 10px;
-  font-size: 24px;
+  font-size: 30px;
   border: none;
   border-radius: 10px;
   background-color: #e9ecef;
   color: #333;
-  cursor: pointer;
+  /*cursor: pointer;*/
   transition: all 0.2s;
   touch-action: manipulation;
   user-select: none;
@@ -76,6 +76,11 @@
   border-color: #86b7fe;
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
+#rutInput::placeholder {
+  color: rgba(108, 117, 125, 0.6);
+  font-style: italic; 
+}
+
 
 /* Media queries para diferentes tamaños de pantalla */
 @media (max-width: 768px) {

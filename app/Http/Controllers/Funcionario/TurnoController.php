@@ -11,37 +11,45 @@ class TurnoController extends Controller
 {
     public function vistaLlamada()
     {
-        $mesonId = Session::get('meson_id');
+        $meson_id = Session::get('meson_id');
 
-        if (!$mesonId) {
+        if (!$meson_id) {
             return redirect()->route('funcionario.meson.seleccionar')->with('error', 'Primero debes seleccionar un mesón.');
         }
 
-        $turnoActual = Turno::where('meson_id', $mesonId)->where('estado', 'atendiendo')->first();
-        $siguienteTurno = Turno::where('meson_id', $mesonId)->where('estado', 'esperando')->orderBy('created_at')->first();
+        $turno_actual = Turno::where('meson_id', $meson_id)
+            ->where('estado', 'atendiendo')
+            ->first();
 
-        return view('funcionario.meson.llamada', compact('turnoActual', 'siguienteTurno'));
+        $siguiente_turno = Turno::where('estado', 'pendiente') // asegurate de usar "pendiente" en vez de "esperando"
+            ->orderBy('created_at')
+            ->first();
+
+        return view('funcionario.meson.llamada', compact('turno_actual', 'siguiente_turno'));
     }
 
     public function llamar(Request $request)
     {
-        $mesonId = Session::get('meson_id');
+        $meson_id = Session::get('meson_id');
 
-        if (!$mesonId) {
+        if (!$meson_id) {
             return redirect()->route('funcionario.meson.seleccionar')->with('error', 'Primero debes seleccionar un mesón.');
         }
 
         // Terminar turno anterior si existe
-        $turnoActual = Turno::where('meson_id', $mesonId)->where('estado', 'atendiendo')->first();
-        if ($turnoActual) {
-            $turnoActual->estado = 'terminado';
-            $turnoActual->save();
+        $turno_actual = Turno::where('meson_id', $meson_id)
+            ->where('estado', 'atendiendo')
+            ->first();
+
+        if ($turno_actual) {
+            $turno_actual->estado = 'atendido'; // mismo estado que el resto del sistema
+            $turno_actual->save();
         }
 
         // Llamar al siguiente turno
         $turno = Turno::findOrFail($request->input('turno_id'));
         $turno->estado = 'atendiendo';
-        $turno->meson_id = $mesonId;
+        $turno->meson_id = $meson_id;
         $turno->save();
 
         return redirect()->route('funcionario.meson.llamada')->with('success', 'Turno en atención.');

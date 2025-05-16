@@ -81,5 +81,55 @@
         </div>
     </div>
 
+
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h3>Mesones en Uso</h3>
+        </div>
+        <div class="card-body">
+            @if($mesonesOcupados->isEmpty())
+                <div class="alert alert-info">No hay mesones ocupados actualmente.</div>
+            @else
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Mesón</th>
+                            <th>Usuario asignado</th>
+                            <th>Servicios en atención</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($mesonesOcupados as $meson)
+                            <tr>
+                                <td>{{ $meson->nombre }}</td>
+                                <td>{{ $meson->usuario?->nombre ?? 'Sin asignar' }}</td>
+                                <td>
+                                    <ul>
+                                        @foreach($meson->usuario?->turnos ?? [] as $turno)
+                                            <li>{{ $turno->servicio->nombre }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                                <td>
+                                    @if($meson->usuario && $meson->usuario->id === Auth::id())
+                                        <form action="{{ route('funcionario.meson.liberar') }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="hidden" name="meson_id" value="{{ $meson->id }}">
+                                            <button type="submit" class="btn btn-danger">Liberar mesón</button>
+                                        </form>
+                                    @else
+                                        <span class="text-muted">No autorizado</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @endif
+        </div>
+    </div>
+
 </div>
 @endsection

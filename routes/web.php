@@ -15,7 +15,7 @@ use App\Http\Controllers\Funcionario\FuncionarioLlamadoController;
 
 
 // Autenticación
-Route::get('/', fn () => redirect()->route('login'));
+Route::get('/', fn() => redirect()->route('login'));
 Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -28,17 +28,13 @@ Route::get('/ingresar-rut',    [TotemController::class, 'show'])->name('totem.sh
 Route::post('/seleccionar',     [TotemController::class, 'select'])->name('totem.select');
 Route::post('/totem/confirmar', [TotemController::class, 'confirmar'])->name('totem.confirmar');
 Route::get('/totem/confirmacion', [TotemController::class, 'confirmacion'])->name('totem.confirmacion');
-
 Route::get('/totem', fn() => view('totem.totem'))->name('totem');
 
 // Rutas protegidas (solo administrador)
 Route::middleware(['auth', 'role:administrador'])->prefix('admin')->name('Admin.')->group(function () {
     Route::resource('usuarios', UsuarioController::class);
-
     Route::get('estadisticas', [EstadisticasController::class, 'index'])->name('estadisticas.index');
-
     Route::resource('mesones', MesonController::class)->except(['show']);
-
     Route::prefix('organizador')->name('organizador.')->group(function () {
         Route::get('/', [OrganizadorController::class, 'index'])->name('index');
         Route::post('servicio', [OrganizadorController::class, 'storeServicio'])->name('storeServicio');
@@ -47,6 +43,8 @@ Route::middleware(['auth', 'role:administrador'])->prefix('admin')->name('Admin.
         Route::delete('materia/{id}', [OrganizadorController::class, 'deleteMateria'])->name('deleteMateria');
         Route::post('moverMateria', [OrganizadorController::class, 'moverMateria'])->name('moverMateria');
         Route::get('/llamar', [FuncionarioLlamadoController::class, 'index'])->name('funcionario.llamar');
+        Route::post('funcionario/meson/asignar', [DashboardController::class, 'asignarMeson'])->name('funcionario.meson.asignar');
+        Route::post('funcionario/meson/liberar', [DashboardController::class, 'liberarMeson'])->name('funcionario.meson.liberar');
     });
 });
 
@@ -56,9 +54,8 @@ Route::middleware(['auth'])
     ->name('funcionario.')
     ->namespace('App\Http\Controllers\Funcionario')
     ->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::match(['get', 'post'], '/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/meson/seleccionar', [FuncionarioMesonController::class, 'seleccionar'])->name('meson.seleccionar');
-        Route::post('/meson/asignar', [FuncionarioMesonController::class, 'asignar'])->name('meson.asignar');
         Route::get('/turnos', [TurnoController::class, 'index'])->name('turnos.index');
         Route::delete('/meson/liberar', [FuncionarioMesonController::class, 'liberar'])->name('meson.liberar');
         Route::get('/llamar', [FuncionarioLlamadoController::class, 'index'])->name('llamar');

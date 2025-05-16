@@ -25,16 +25,15 @@ class UsuarioController extends Controller
         $request->validate([
             'nombre' => 'required|string|max:255',
             'email' => 'required|email|unique:usuarios,email',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:6|confirmed',
             'rol' => 'required|in:administrador,funcionario,soporte',
         ]);
-
-        $hashedPassword = Hash::make($request->password);
 
         $usuario = new Usuarios();
         $usuario->nombre = $request->nombre;
         $usuario->email = $request->email;
-        $usuario->password = $hashedPassword;  
+        // El modelo Usuarios tiene mutator para cifrar el password
+        $usuario->password = $request->password;
         $usuario->rol = $request->rol;
         $usuario->save();
 
@@ -53,30 +52,29 @@ class UsuarioController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    
-    $usuario = Usuarios::findOrFail($id);
+    {
+        $usuario = Usuarios::findOrFail($id);
 
-    $request->validate([
-        'nombre' => 'required|string',
-        'email' => "required|email|unique:usuarios,email,$id", 
-        'password' => 'nullable|string|min:6', 
-        'rol' => 'required|in:administrador,funcionario,soporte',
-    ]);
+        $request->validate([
+            'nombre' => 'required|string',
+            'email' => "required|email|unique:usuarios,email,$id",
+            'password' => 'nullable|string|min:6|confirmed',
+            'rol' => 'required|in:administrador,funcionario,soporte',
+        ]);
 
-    $data = $request->all();
+        $usuario->nombre = $request->nombre;
+        $usuario->email = $request->email;
+        $usuario->rol = $request->rol;
 
-    if (empty($data['password'])) {
-        unset($data['password']);
-    } else {
-        $data['password'] = Hash::make($data['password']);
+        if (!empty($request->password)) {
+            // Si envían contraseña nueva, se cifra en el mutator del modelo
+            $usuario->password = $request->password;
+        }
+
+        $usuario->save();
+
+        return redirect()->route('Admin.usuarios.index')->with('success', 'Usuario actualizado correctamente.');
     }
-
-    $usuario->update($data);
-
-    return redirect()->route('Admin.usuarios.index')->with('success', 'Usuario actualizado correctamente.');
-}
-
 
     public function destroy(Usuarios $usuario)
     {

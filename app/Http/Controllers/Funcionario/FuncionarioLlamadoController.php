@@ -48,35 +48,43 @@ class FuncionarioLlamadoController extends Controller
                 return $t;
             });
 
-        return view('funcionario.llamar', compact('meson', 'turno_actual', 'turnos_espera', 'turnos_atendidos'));
+        $mesones_disponibles = Meson::whereNull('usuario_id')->get();
+
+        return view('funcionario.dashboard', compact(
+            'meson',
+            'turno_actual',
+            'turnos_espera',
+            'turnos_atendidos',
+            'mesones_disponibles'
+        ));
     }
 
     public function llamarTurno(Request $request)
     {
+        $request->validate([
+            'turno_id' => 'required|exists:turnos,id',
+        ]);
+
         $turno = Turno::findOrFail($request->turno_id);
         $turno->estado = 'atendiendo';
         $turno->meson_id = session('meson_id');
         $turno->updated_at = now();
         $turno->save();
 
-        $request->validate([
-            'turno_id' => 'required|exists:turnos,id',
-        ]);
-
-        return redirect()->route('funcionario.llamar');
+        return redirect()->route('funcionario.dashboard');
     }
 
     public function finalizarTurno(Request $request)
     {
+        $request->validate([
+            'turno_id' => 'required|exists:turnos,id',
+        ]);
+
         $turno = Turno::findOrFail($request->turno_id);
         $turno->estado = 'atendido';
         $turno->updated_at = now();
         $turno->save();
 
-        $request->validate([
-            'turno_id' => 'required|exists:turnos,id',
-        ]);
-
-        return redirect()->route('funcionario.llamar');
+        return redirect()->route('funcionario.dashboard');
     }
 }

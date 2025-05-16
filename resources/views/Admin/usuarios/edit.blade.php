@@ -29,8 +29,13 @@
         </div>
 
         <div class="form-group">
-            <label for="password">Contraseña (dejar en blancopara no cambiar)</label>
+            <label for="password">Contraseña (dejar en blanco para no cambiar)</label>
             <input type="password" name="password" class="form-control">
+        </div>
+
+        <div class="form-group">
+            <label for="password_confirmation">Confirmar Contraseña</label>
+            <input type="password" name="password_confirmation" class="form-control">
         </div>
 
         <div class="form-group">

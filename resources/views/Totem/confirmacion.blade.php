@@ -16,3 +16,14 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+window.addEventListener('load', () => {
+    window.print(); // Dispara la impresión
+    setTimeout(() => {
+        window.location.href = "{{ route('totem.show') }}"; // Redirige después de 3 segundos
+    }, 1000);
+});
+</script>
+@endpush

@@ -22,14 +22,19 @@
             <input type="text" id="nombre" name="nombre" class="form-control" required>       
         </div>
 
-        <div>
+        <div class="form-group">
             <label for="email">Correo</label>
             <input type="email" id="email" name="email" class="form-control" required>
         </div>
 
-        <div>
+        <div class="form-group">
             <label for="password">Contraseña</label>
             <input type="password" id="password" name="password" class="form-control" required> 
+        </div>
+
+        <div class="form-group">
+            <label for="password_confirmation">Confirmar Contraseña</label>
+            <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" required>
         </div>
 
         <div class="form-group">
@@ -44,7 +49,6 @@
         <button type="submit" class="btn btn-guardar">Guardar Usuario</button>
         <a href="{{ route('Admin.usuarios.index') }}" class="btn btn-secondary">Volver</a>
     </form>
-    
 
 </div>
 @endsection
