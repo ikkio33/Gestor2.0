@@ -16,7 +16,7 @@
     border: 2px solid #007bff;
     border-radius: 12px;
     padding: 30px 40px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     width: 100%;
 }
@@ -36,7 +36,8 @@
     margin-bottom: 20px;
     border: 3px dashed #007bff;
     padding: 15px 0;
-    user-select: all; /* para que puedan copiar el código si quieren */
+    user-select: all;
+    /* para que puedan copiar el código si quieren */
 }
 
 .confirm-card p {
@@ -46,6 +47,15 @@
 }
 
 @media print {
+    body {
+        visibility: visible;
+    }
+
+    .confirm-wrapper,
+    .confirm-card {
+        visibility: visible;
+    }
+
     .confirm-wrapper {
         background: white !important;
         box-shadow: none !important;
@@ -67,4 +77,25 @@
         color: black !important;
         letter-spacing: 0.2em !important;
     }
+
+    .qr-container {
+        display: block !important;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    svg {
+        width: 150px;
+        height: 150px;
+        margin: auto;
+        display: block;
+    }
+
+    .btn,
+    a,
+    button {
+        display: none !important;
+        /* Oculta botones en impresión */
+    }
+
 }

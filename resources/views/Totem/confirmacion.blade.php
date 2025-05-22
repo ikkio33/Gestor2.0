@@ -11,6 +11,13 @@
     <div class="confirm-card">
         <h2>¡Turno Generado!</h2>
         <div class="display-code">{{ $codigo }}</div>
+
+        {{-- Código QR --}}
+        <div class="qr-container" style="margin: 20px 0;">
+            {!! $qr !!}
+            <p style="margin-top: 10px;">Escanea este código para ver el estado de tu turno desde tu teléfono.</p>
+        </div>
+
         <p>Por favor, espere a ser llamado en pantalla.</p>
         <a href="{{ route('totem.show') }}" class="btn btn-primary">Volver al inicio</a>
     </div>
@@ -22,7 +29,7 @@
 window.addEventListener('load', () => {
     window.print(); // Dispara la impresión
     setTimeout(() => {
-        window.location.href = "{{ route('totem.show') }}"; // Redirige después de 3 segundos
+        window.location.href = "{{ route('totem.show') }}"; // Redirige después de 1 segundo
     }, 1000);
 });
 </script>

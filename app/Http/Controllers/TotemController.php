@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TotemController extends Controller
 {
@@ -112,14 +113,26 @@ class TotemController extends Controller
 
     public function confirmacion(Request $request)
     {
-        // Obtenemos por GET
         $codigo = $request->query('codigo');
         $rut    = $request->query('rut');
 
         if (! $codigo || ! $rut) {
             return redirect()->route('totem.show')->with('error', 'Faltan datos para mostrar la confirmación.');
         }
+        $url = route('turno.estado', ['codigo' => $codigo]);
+        // $url = 'https://gesnote.cl' . route('turno.estado', ['codigo' => $codigo], false);
+        // Generar el código QR
+        $qr = QrCode::size(200)->generate($url);
 
-        return view('totem.confirmacion', compact('codigo', 'rut'));
+
+        return view('totem.confirmacion', compact('codigo', 'rut', 'qr'));
+    }
+
+    public function estadoTurno(Request $request)
+    {
+        $codigo = $request->query('codigo');
+
+        // Buscar info real del turno 
+        return "Estado actual del turno: $codigo (ejemplo)";
     }
 }

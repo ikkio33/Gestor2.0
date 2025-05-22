@@ -1,6 +1,9 @@
 @section('styles')
 <link href="{{ asset('css/vista.css') }}" rel="stylesheet">
-<link href="{{ asset('js/vista.js') }}" rel="stylesheet">
+<script src="{{ asset('js/vista.js') }}" defer></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 @endsection
 
 @yield('styles')

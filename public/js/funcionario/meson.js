@@ -1,56 +1,65 @@
-$(document).ready(function() {
+$(document).ready(function () {
     // Asignar mesón al funcionario
-    $('#form-asignar-meson').submit(function(e) {
+    $('#form-asignar-meson').submit(function (e) {
         e.preventDefault();
+        const $btn = $(this).find('button[type=submit]');
+        $btn.prop('disabled', true);
 
-        var meson_id = $('#meson').val();
-        var token = $('meta[name="csrf-token"]').attr('content');
+        const meson_id = $('#meson').val();
+        const token = $('meta[name="csrf-token"]').attr('content');
 
         $.ajax({
-            url: '{{ route("funcionario.meson.asignar") }}',
+            url: window.rutasMeson.asignar,
             type: 'POST',
             data: {
                 _token: token,
                 meson_id: meson_id
             },
-            success: function(response) {
-                if (response.success) {
-                    $('#meson-container').html('<div class="alert alert-success">' + response.message + '</div>');
+            success: function (response) {
+                if (response.success || response.message) {
+                    $('#meson-container').html('<div class="alert alert-success">' + (response.message || 'Mesón asignado.') + '</div>');
                     $('#meson-liberado').show();
                     $('#form-asignar-meson').hide();
                 } else {
-                    alert(response.message);
+                    alert(response.message || 'Error al asignar el mesón.');
                 }
             },
-            error: function() {
+            error: function () {
                 alert('Ocurrió un error al asignar el mesón.');
+            },
+            complete: function() {
+                $btn.prop('disabled', false);
             }
         });
     });
 
     // Liberar mesón
-    $('#liberar-meson').click(function() {
-        var meson_id = $('#meson').val();
-        var token = $('meta[name="csrf-token"]').attr('content');
+    $('#liberar-meson').click(function () {
+        const $btn = $(this);
+        $btn.prop('disabled', true);
+
+        const token = $('meta[name="csrf-token"]').attr('content');
 
         $.ajax({
-            url: '{{ route("funcionario.meson.liberar") }}',
-            type: 'DELETE',
+            url: window.rutasMeson.liberar,
+            type: 'POST', // Método correcto según rutas
             data: {
-                _token: token,
-                meson_id: meson_id
+                _token: token
             },
-            success: function(response) {
-                if (response.success) {
-                    $('#meson-container').html('<div class="alert alert-success">' + response.message + '</div>');
+            success: function (response) {
+                if (response.success || response.message) {
+                    $('#meson-container').html('<div class="alert alert-success">' + (response.message || 'Mesón liberado.') + '</div>');
                     $('#meson-liberado').hide();
                     $('#form-asignar-meson').show();
                 } else {
-                    alert(response.message);
+                    alert(response.message || 'Error al liberar el mesón.');
                 }
             },
-            error: function() {
-                alert('Ocurrió un error al liberar el mesón.');
+            error: function () {
+                alert('Error liberando mesón, revisa consola.');
+            },
+            complete: function() {
+                $btn.prop('disabled', false);
             }
         });
     });
