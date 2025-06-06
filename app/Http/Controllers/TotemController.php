@@ -42,11 +42,6 @@ class TotemController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        $materias = DB::table('materias')
-            ->orderBy('nombre')
-            ->get();
-
-
         $materiasPorServicio = [];
         foreach ($materias as $materia) {
             $materiasPorServicio[$materia->servicio_id][] = $materia;
@@ -63,7 +58,6 @@ class TotemController extends Controller
             'materia_id'   => ['nullable', 'integer'],
         ]);
 
-        // (2) Nos aseguramos de que el compareciente existe y obtenemos su ID
         $compareciente = DB::table('compareciente')
             ->where('rut', $data['rut'])
             ->first();
@@ -76,14 +70,12 @@ class TotemController extends Controller
                 'updated_at' => now(),
             ]);
 
-        // Verificar servicio
         $servicio = DB::table('servicios')->find($data['servicio_id']);
         if (! $servicio) {
             return back()->withErrors(['servicio_id' => 'Servicio no válido.']);
         }
         $letra = $servicio->letra;
 
-        // Generar número de turno
         $maxHoy = DB::table('turnos')
             ->where('servicio_id', $data['servicio_id'])
             ->whereDate('created_at', now()->toDateString())
@@ -92,7 +84,6 @@ class TotemController extends Controller
         $nuevoNumero = $maxHoy + 1;
         $codigoTurno = $letra . str_pad($nuevoNumero, 2, '0', STR_PAD_LEFT);
 
-        // Insertar turno
         DB::table('turnos')->insert([
             'codigo_turno'  => $codigoTurno,
             'cliente_id'    => $comparecienteId,
@@ -104,7 +95,6 @@ class TotemController extends Controller
             'updated_at'    => now(),
         ]);
 
-        // (3) Redirigir a confirmación, pasando código *y* rut como query params
         return redirect()->route('totem.confirmacion', [
             'codigo' => $codigoTurno,
             'rut'    => $data['rut'],
@@ -114,25 +104,49 @@ class TotemController extends Controller
     public function confirmacion(Request $request)
     {
         $codigo = $request->query('codigo');
-        $rut    = $request->query('rut');
 
-        if (! $codigo || ! $rut) {
-            return redirect()->route('totem.show')->with('error', 'Faltan datos para mostrar la confirmación.');
+        if (! $codigo) {
+            return redirect()->route('totem.show')->with('error', 'Falta el código para mostrar la confirmación.');
         }
-        $url = route('turno.estado', ['codigo' => $codigo]);
-        // $url = 'https://gesnote.cl' . route('turno.estado', ['codigo' => $codigo], false);
-        // Generar el código QR
+
+        // 1. Buscar el turno actual por código
+        $turnoActual = DB::table('turnos')
+            ->where('codigo_turno', $codigo)
+            ->first();
+
+        if (! $turnoActual) {
+            return redirect()->route('totem.show')->with('error', 'Turno no encontrado.');
+        }
+
+        $servicioId = $turnoActual->servicio_id;
+
+        // 2. Turnos pendientes SOLO del MISMO servicio
+        $turnosPendientes = DB::table('turnos')
+            ->where('servicio_id', $servicioId)
+            ->where('estado', 'pendiente')
+            ->whereDate('created_at', now()->toDateString())
+            ->orderBy('numero_turno')
+            ->get();
+
+        // 3. Turnos en atención SOLO del MISMO servicio
+        $turnosAtendiendo = DB::table('turnos')
+            ->where('servicio_id', $servicioId)
+            ->where('estado', 'atendiendo')
+            ->whereDate('created_at', now()->toDateString())
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        // 4. URL QR sin rut
+        $url = 'http://127.0.0.1:8000/gesnot/turnos?codigo=' . urlencode($codigo);
         $qr = QrCode::size(200)->generate($url);
 
-
-        return view('totem.confirmacion', compact('codigo', 'rut', 'qr'));
-    }
-
-    public function estadoTurno(Request $request)
-    {
-        $codigo = $request->query('codigo');
-
-        // Buscar info real del turno 
-        return "Estado actual del turno: $codigo (ejemplo)";
+        // 5. Retornar vista con turno actual, pendientes y en atención del mismo servicio
+        return view('totem.confirmacion', [
+            'qr' => $qr,
+            'codigo' => $codigo,
+            'turnoActual' => $turnoActual,
+            'turnosPendientes' => $turnosPendientes,
+            'turnosAtendiendo' => $turnosAtendiendo,
+        ]);
     }
 }

@@ -21,19 +21,26 @@ class PublicoAjaxController extends Controller
      */
     public function turnosActuales()
     {
-        // Obtener hasta 6 turnos en estado 'atendiendo', ordenados por actualización descendente
+        // Obtener hasta 6 turnos en atención
         $turnos = Turno::with(['servicio', 'meson'])
-            ->where('estado', 'atendiendo')
+            ->where('estado', 'atendiendo', now())
             ->orderBy('updated_at', 'desc')
             ->limit(6)
             ->get();
 
         if ($turnos->isEmpty()) {
-            // No hay turnos atendiendo, indicamos que no hay datos nuevos
             return response()->json(['nuevo' => false]);
         }
 
-        // Mapear los turnos para solo enviar los datos necesarios
+        // Tomamos el turno actual (más reciente)
+        $turnoActual = $turnos->first();
+
+        // Contamos cuántos turnos pendientes quedan del mismo servicio
+        $pendientesMismoServicio = Turno::where('estado', 'pendiente')
+            ->where('servicio_id', $turnoActual->servicio_id)
+            ->count();
+
+        // Mapear los turnos
         $datosTurnos = $turnos->map(function ($turno) {
             return [
                 'codigo' => $turno->codigo_turno,
@@ -42,10 +49,10 @@ class PublicoAjaxController extends Controller
             ];
         });
 
-        // Devolvemos la lista de turnos y confirmamos que hay datos nuevos
         return response()->json([
             'nuevo' => true,
             'turnos' => $datosTurnos,
+            'pendientes_mismo_servicio' => $pendientesMismoServicio
         ]);
     }
 }

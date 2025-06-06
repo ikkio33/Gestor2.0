@@ -8,6 +8,7 @@ use App\Models\Turno;
 use App\Models\Meson;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 
 class FuncionarioLlamadoController extends Controller
 {
@@ -86,5 +87,28 @@ class FuncionarioLlamadoController extends Controller
         $turno->save();
 
         return redirect()->route('funcionario.dashboard');
+    }
+    
+    public function turnoActualPublico(): JsonResponse
+    {
+        // Buscamos el turno que está "atendiendo" hoy, el más reciente
+        $turnoActual = Turno::where('estado', 'atendiendo')
+            ->whereDate('created_at', now())
+            ->latest('updated_at')
+            ->first();
+
+        if (!$turnoActual) {
+            // No hay turno en atención
+            return response()->json([
+                'nuevo' => false,
+            ]);
+        }
+
+        return response()->json([
+            'nuevo' => true,
+            'codigo' => $turnoActual->codigo_turno, // Ajusta si el campo se llama diferente
+            'servicio' => $turnoActual->servicio->nombre ?? 'Servicio no definido',
+            'meson' => $turnoActual->meson->nombre ?? 'Mesón no definido',
+        ]);
     }
 }

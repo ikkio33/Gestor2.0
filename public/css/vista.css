@@ -2,13 +2,14 @@ body {
     background-color: #f0f2f5;
     margin: 0;
     font-family: Arial, sans-serif;
+    padding: 0 0.5rem; /* Evitar que el contenido quede pegado en móviles */
 }
 
 h1 {
     text-align: center;
-    font-size: 4.5rem;
-    margin-top: 6rem;
-    margin-bottom: 3rem;
+    font-size: 2.5rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
     width: 100%;
 }
 
@@ -21,9 +22,9 @@ h1 {
 }
 
 .turno-box {
-    flex: 1 1 30%;
-    min-width: 300px;
-    max-width: 100%;
+    flex: 1 1 80%;       /* Base para que intente ocupar 80% */
+    min-width: 90%;     /* No muy pequeño en móviles */
+    max-width: 80vw;      /* No más ancho que 80% del viewport */
     font-weight: bold;
     padding: 1.5rem;
     border-radius: 1.5rem;
@@ -38,13 +39,15 @@ h1 {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+
 .turno-box.new-turno {
     animation: fadeInUp 1s ease;
 }
 
 .turno-box:nth-child(n+7) {
-    display: none !important;
+    display: none;
 }
+
 .no-turnos-box {
     max-width: 600px;
     margin: 4rem auto;
@@ -59,7 +62,13 @@ h1 {
     animation: fadeInUp 1s ease;
 }
 
-
+.badge-turno {
+    font-size: 1.8rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 1.5rem;
+    background-color: #0d6efd;
+    color: #fff;
+}
 
 @keyframes fadeInUp {
     from {
@@ -72,26 +81,71 @@ h1 {
     }
 }
 
-.badge-turno {
-    font-size: 1.8rem;
-    padding: 0.8rem 1.5rem;
-    border-radius: 1.5rem;
-    background-color: #0d6efd;
-    color: #fff;
+/* Móviles muy pequeños */
+@media (max-width: 575.98px) {
+    .turnos-list {
+        gap: 1rem;
+        padding: 0 0.5rem;
+    }
+    .turno-box {
+        flex: 1 1 100%;
+        min-width: auto;
+        max-width: 100%;
+        padding: 1rem;
+        font-size: 1.4rem;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        margin-top: 3rem;
+        margin-bottom: 2rem;
+    }
 }
 
-@media (min-width: 576px) {
-    .turno-box { font-size: 1.6rem; }
+/* Tablets y pantallas pequeñas */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .turno-box {
+        flex: 1 1 45%;
+        min-width: 220px;
+        max-width: 100%;
+        font-size: 1.6rem;
+    }
 }
 
-@media (min-width: 768px) {
-    .turno-box { font-size: 2rem; }
+/* Tablets grandes y laptops */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .turno-box {
+        font-size: 2rem;
+    }
 }
 
-@media (min-width: 992px) {
-    .turno-box { font-size: 2.5rem; }
+/* Laptops grandes y pantallas de escritorio */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .turno-box {
+        font-size: 2.5rem;
+    }
 }
 
-@media (min-width: 1200px) {
-    .turno-box { font-size: 3rem; }
+/* Pantallas grandes */
+@media (min-width: 1200px) and (max-width: 1919.98px) {
+    .turno-box {
+        font-size: 3rem;
+    }
+}
+
+/* Pantallas muy grandes: monitores y TVs 55" para arriba */
+@media (min-width: 1920px) {
+    .turno-box {
+        font-size: 4.5rem;
+        max-width: 600px;
+        padding: 3rem;
+        border-width: 5px;
+        border-radius: 2rem;
+    }
+
+    h1 {
+        font-size: 6rem;
+        margin-top: 8rem;
+        margin-bottom: 4rem;
+    }
 }

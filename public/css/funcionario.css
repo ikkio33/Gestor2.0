@@ -1,207 +1,158 @@
-body {
-    font-family: 'Nunito', sans-serif;
-    background-color: #F3F4F6; /* gris claro suave */
-    color: #1F2937; /* gris oscuro */
-    margin: 0;
-    padding: 0;
+/* Estilos generales - Compatibles con Bootstrap */
+.centro-mando-container {
+    width: 80%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
 }
 
-h2, h3, h4 {
-    color: #1D4ED8; /* azul Gesnot */
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
-h2 {
-    font-size: 2rem;
-    text-align: center;
-}
-
-h3 {
-    font-size: 1.5rem;
-    text-align: left;
-}
-
-h4 {
-    font-size: 1.2rem;
-}
-.logout-btn {
+.centro-mando-container h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
     font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s ease;
-    border: 2px solid #DC2626;
-    color: #DC2626;
-    background-color: transparent;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
 }
 
-.logout-btn:hover {
-    background-color: #DC2626;
-    color: white;
+.centro-mando-container h4 {
+    color: #2980b9;
+    font-weight: 500;
+    margin-bottom: 15px;
 }
 
-
-.container-fluid {
-    width: auto;
-}
-
-/* Tarjetas */
-.card {
-    background-color: #ffffff;
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    margin-bottom: 1.5rem;
-}
-
-.card-header {
-    background-color: #1D4ED8;
-    color: white;
-    font-weight: 700;
-    font-size: 1.2rem;
-    padding: 0.75rem 1rem;
-    border-top-left-radius: 0.75rem;
-    border-top-right-radius: 0.75rem;
-}
-
-.card-body {
-    padding: 1.25rem;
-}
-
-/* Botones */
-.btn {
-    border-radius: 0.5rem;
-    padding: 0.6rem 1.2rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: background-color 0.2s ease;
-}
-
-.btn-primary {
-    background-color: #1D4ED8;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #2563EB;
-}
-
-.btn-danger {
-    background-color: #DC2626;
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #B91C1C;
-}
-
-.btn-success {
-    background-color: #22C55E;
-    color: white;
-}
-
-.btn-success:hover {
-    background-color: #16A34A;
-}
-
-.btn-secondary {
-    background-color: #6B7280;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: #4B5563;
-}
-
-/* Tablas */
-.table {
-    border-radius: 0.5rem;
-    overflow: hidden;
-    margin-top: 1rem;
-}
-
-.table thead th {
-    background-color: #E5E7EB;
-    color: #374151;
-    font-weight: bold;
-    padding: 0.75rem;
-}
-
-.table tbody td {
-    padding: 0.75rem;
-    color: #4B5563;
-}
-
-.table-striped tbody tr:nth-child(odd) {
-    background-color: #F9FAFB;
-}
-
-.table-hover tbody tr:hover {
-    background-color: #E0E7FF;
-}
-
-/* Alertas */
-.alert {
-    padding: 1rem;
-    border-radius: 0.5rem;
-    border-left: 5px solid;
-}
-
-.alert-success {
-    background-color: #ECFDF5;
-    color: #065F46;
-    border-color: #10B981;
-}
-
-.alert-warning {
-    background-color: #FFFBEB;
-    color: #92400E;
-    border-color: #F59E0B;
-}
-
-.alert-info {
-    background-color: #DBEAFE;
-    color: #1E3A8A;
-    border-color: #3B82F6;
-}
-
-/* Carousel */
-.carousel-item {
+/* Layout principal de mesones - Compatible con Bootstrap */
+.mesones-grid {
     display: flex;
-    justify-content: center;
-    gap: 1rem;
+    flex-wrap: nowrap;
+    gap: 20px;
+    height: 60vh;
+    margin-bottom: 30px;
 }
 
-.carousel-control-prev,
-.carousel-control-next {
-    width: 5%;
+/* Contenedores de mesones con scroll */
+.mesones-columna {
+    flex: 1;
+    min-width: 0; /* Necesario para que funcione con Bootstrap */
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* Extra */
-.tiempo-espera {
-    font-weight: 700;
-    color: #1D4ED8;
-}
-
-.mesones-en-uso-container {
-    max-height: 300px;
+/* Wrapper interno para el scroll */
+.mesones-scroll-container {
     overflow-y: auto;
-    border: 1px solid #E5E7EB;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    background-color: #ffffff;
-    margin-top: 1rem;
+    flex-grow: 1;
+    padding-right: 10px;
+}
+
+/* Personalización del scroll */
+.mesones-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.mesones-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.mesones-scroll-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.mesones-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Listas de mesones */
+.mesones-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    padding-bottom: 10px;
+}
+
+/* Estilos para tarjetas de mesones */
+.meson-card {
+    background-color: white;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border-left: 4px solid #3498db;
+}
+
+.meson-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-left: 4px solid #2980b9;
+}
+
+/* Estados de los mesones */
+.meson-card.disponible {
+    border-left-color: #2ecc71;
+}
+
+.meson-card.ocupado {
+    border-left-color: #e74c3c;
+}
+
+.meson-card.asignado {
+    border-left-color: #f39c12;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .centro-mando-container {
+        width: 90%;
+    }
 }
 
 @media (max-width: 768px) {
-    .container-fluid {
-        padding: 1rem;
-    }
-
-    .col-md-6 {
-        margin-bottom: 1.5rem;
-    }
-
-    .carousel-item {
+    .mesones-grid {
         flex-direction: column;
+        height: auto;
     }
+    
+    .mesones-columna {
+        height: 40vh;
+    }
+}
+
+/* Estilos para las otras secciones (turnos) */
+.turnos-section {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.turno-item {
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.meson-card, .turno-item {
+    animation: fadeIn 0.3s ease forwards;
 }

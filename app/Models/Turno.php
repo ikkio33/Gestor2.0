@@ -19,7 +19,8 @@ class Turno extends Model
         'tiempo_espera',
         'meson_id',
         'turno',
-        'materia_id', // Si usas esta relación
+        'materia_id',
+        'codigo_turno' // Si usas esta relación
     ];
 
     // Estados posibles (opcional pero recomendable)
@@ -34,7 +35,7 @@ class Turno extends Model
 
     public function servicio()
     {
-        return $this->belongsTo(Servicio::class);
+        return $this->belongsTo(Servicio::class,);
     }
 
     public function meson()
@@ -50,7 +51,8 @@ class Turno extends Model
     protected static function booted()
     {
         static::creating(function ($turno) {
-            $turno->codigo_seguimiento = Str::random(10);
+            $turno->codigo_turno = Str::random(10);
         });
     }
+    
 }

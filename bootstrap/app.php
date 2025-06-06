@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -10,10 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->use([
+            \Illuminate\Http\Middleware\HandleCors::class, // <- Aquí activamos CORS
+        ]);
+
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
-            'role' => \App\Http\Middleware\CheckRole::class, 
-            'rol' => \App\Http\Middleware\RolMiddleware::class, // Asegúrate de que esta clase exista y esté en la ubicación correcta
+            'role' => \App\Http\Middleware\CheckRole::class,
+            'rol' => \App\Http\Middleware\RolMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

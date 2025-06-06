@@ -1,88 +1,102 @@
 <?php
-
 namespace App\Http\Controllers\Funcionario;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Turno;
-use Illuminate\Support\Facades\Session;
+use App\Models\Meson;
+use Illuminate\Support\Facades\Auth;
 
-class TurnoController extends Controller
+class MesonController extends Controller
 {
-    public function vistaLlamada()
+    // Devuelve mesón asignado y mesones disponibles
+    public function disponibles()
     {
-        $meson_id = Session::get('meson_id');
+        $userId = Auth::id();
 
-        if (!$meson_id) {
-            return redirect()->route('funcionario.meson.seleccionar')->with('error', 'Primero debes seleccionar un mesón.');
-        }
+        $mesonAsignado = Meson::where('usuario_id', $userId)->first();
 
-        $turno_actual = Turno::where('meson_id', $meson_id)
-            ->where('estado', 'atendiendo')
-            ->first();
+        // Los mesones disponibles son los que tienen disponible = true
+        $mesonesDisponibles = Meson::where('disponible', true)->get();
 
-        $siguiente_turno = Turno::where('estado', 'pendiente') // asegurate de usar "pendiente" en vez de "esperando"
-            ->orderBy('created_at')
-            ->first();
-
-        return view('funcionario.meson.llamada', compact('turno_actual', 'siguiente_turno'));
+        return response()->json([
+            'meson_asignado' => $mesonAsignado,
+            'mesones' => $mesonesDisponibles,
+        ]);
     }
 
-    public function llamar(Request $request)
+    // Asigna mesón al usuario, libera mesón anterior si existía
+    public function asignar(Request $request)
     {
-        $meson_id = Session::get('meson_id');
+        $request->validate([
+            'meson_id' => 'required|exists:meson,id',
+        ]);
 
-        if (!$meson_id) {
-            return redirect()->route('funcionario.meson.seleccionar')->with('error', 'Primero debes seleccionar un mesón.');
+        $user = Auth::user();
+        // Ensure $user is an Eloquent model instance
+        if (!($user instanceof \App\Models\User)) {
+            $user = \App\Models\User::find(Auth::id());
+        }
+        $nuevoMeson = Meson::findOrFail($request->meson_id);
+
+        if (!$nuevoMeson->disponible) {
+            return response()->json(['error' => 'Este mesón ya está ocupado.'], 409);
         }
 
-        // Terminar turno anterior si existe
-        $turno_actual = Turno::where('meson_id', $meson_id)
-            ->where('estado', 'atendiendo')
-            ->first();
-
-        if ($turno_actual) {
-            $turno_actual->estado = 'atendido'; // mismo estado que el resto del sistema
-            $turno_actual->save();
+        // Liberar mesón anterior (si existe)
+        if ($user->meson_id && $user->meson_id != $nuevoMeson->id) {
+            $mesonAnterior = Meson::find($user->meson_id);
+            if ($mesonAnterior) {
+                $mesonAnterior->disponible = true;
+                $mesonAnterior->usuario_id = null;
+                $mesonAnterior->save();
+            }
         }
 
-        // Llamar al siguiente turno
-        $turno = Turno::findOrFail($request->input('turno_id'));
-        $turno->estado = 'atendiendo';
-        $turno->meson_id = $meson_id;
-        $turno->save();
+        // Asignar nuevo mesón
+        $nuevoMeson->disponible = false;
+        $nuevoMeson->usuario_id = $user->id;
+        $nuevoMeson->save();
 
-        return redirect()->route('funcionario.meson.llamada')->with('success', 'Turno en atención.');
+        // Actualizar usuario también (opcional, si tienes columna meson_id)
+        $user->meson_id = $nuevoMeson->id;
+        if ($user instanceof \App\Models\User) {
+            $user->save();
+        } else {
+            \App\Models\User::where('id', $user->id)->update(['meson_id' => $nuevoMeson->id]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Mesón asignado correctamente.']);
     }
 
-    public function llamarAjax(Request $request)
-{
-    $meson_id = Session::get('meson_id');
+    // Libera el mesón asignado al usuario
+    public function liberar()
+    {
+        $user = Auth::user();
 
-    if (!$meson_id) {
-        return response()->json(['error' => 'Mesón no asignado'], 400);
+        if (!$user->meson_id) {
+            return response()->json(['error' => 'No tienes mesón asignado.'], 404);
+        }
+
+        $meson = Meson::find($user->meson_id);
+        if (!$meson) {
+            return response()->json(['error' => 'Mesón no encontrado.'], 404);
+        }
+
+        $user->meson_id = null;
+        if ($user instanceof \App\Models\User) {
+            $user->save();
+        } else {
+            \App\Models\User::where('id', $user->id)->update(['meson_id' => null]);
+        }
+        $meson->save();
+
+        $user->meson_id = null;
+        if ($user instanceof \App\Models\User) {
+            $user->save();
+        } else {
+            \App\Models\User::where('id', $user->id)->update(['meson_id' => null]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Mesón liberado correctamente.']);
     }
-
-    // Terminar turno anterior si existe
-    $turno_actual = Turno::where('meson_id', $meson_id)
-        ->where('estado', 'atendiendo')
-        ->first();
-
-    if ($turno_actual) {
-        $turno_actual->estado = 'atendido';
-        $turno_actual->save();
-    }
-
-    // Llamar al siguiente turno
-    $turno = Turno::findOrFail($request->input('turno_id'));
-    $turno->estado = 'atendiendo';
-    $turno->meson_id = $meson_id;
-    $turno->save();
-
-    return response()->json([
-        'success' => true,
-        'turno' => $turno
-    ]);
-}
-
 }

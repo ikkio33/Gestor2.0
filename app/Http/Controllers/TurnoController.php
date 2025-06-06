@@ -41,6 +41,7 @@ class TurnoController extends Controller
 
         return view('turno.seguimiento', compact('turno', 'turno_antes'));
     }
+
     public function estado($codigo)
     {
         $turno = DB::table('turnos')
@@ -58,5 +59,29 @@ class TurnoController extends Controller
 
         // Pasa solo el código del turno a la vista para evitar problemas
         return view('turno.estado', ['codigo' => $turno->codigo_turno]);
+    }
+
+    public function turnoActualPublico()
+    {
+        $turnos = Turno::where('estado', 'atendiendo')
+            ->latest('created_at')
+            ->take(5)
+            ->with(['servicio', 'meson'])
+            ->get();
+
+        if ($turnos->isNotEmpty()) {
+            return response()->json([
+                'nuevo' => true,
+                'turnos' => $turnos->map(function ($turno) {
+                    return [
+                        'codigo' => $turno->codigo_turno,  
+                        'servicio' => $turno->servicio->nombre ?? 'Desconocido',
+                        'meson' => $turno->meson->nombre ?? 'N/D',
+                    ];
+                }),
+            ]);
+        }
+
+        return response()->json(['nuevo' => false]);
     }
 }

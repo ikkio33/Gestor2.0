@@ -12,7 +12,7 @@ class OrganizadorController extends Controller
     public function index()
     {
         $servicios = Servicio::with('materias')->orderBy('letra')->get();
-        return view('Admin.Organizador.index', compact('servicios'));
+        return view('Admin.organizador.index', compact('servicios'));
     }
 
     public function storeServicio(Request $request)

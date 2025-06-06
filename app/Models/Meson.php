@@ -18,39 +18,37 @@ class Meson extends Model
 
     protected $fillable = ['nombre', 'estado', 'disponible'];
 
-    
     public function servicios(): BelongsToMany
     {
         return $this->belongsToMany(Servicio::class, 'meson_servicio', 'meson_id', 'servicio_id');
     }
 
-    
     public function usuario(): HasOne
     {
         return $this->hasOne(Usuarios::class, 'meson_id');
     }
 
-    /**
-     * Obtener todos los turnos a través del usuario asignado.
-     */
     public function turnos(): HasManyThrough
     {
         return $this->hasManyThrough(
             Turno::class,
             Usuarios::class,
-            'meson_id',   // FK en usuarios
-            'usuario_id', // FK en turnos
-            'id',         // PK en meson
-            'id'          // PK en usuarios
+            'meson_id',
+            'usuario_id',
+            'id',
+            'id'
         );
     }
 
-    /**
-     * Asigna este mesón a un usuario, liberando al anterior si existe.
-     */
+    // Mutator para mantener estado sincronizado con disponible
+    public function setDisponibleAttribute($value)
+    {
+        $this->attributes['disponible'] = $value;
+        $this->attributes['estado'] = $value ? 'Libre' : 'Ocupado';
+    }
+
     public function asignarA(Usuarios $user): void
     {
-        // Liberar usuario previo si existe
         if ($prev = $this->usuario) {
             if ($prev->id !== $user->id) {
                 $prev->meson_id = null;
@@ -58,18 +56,14 @@ class Meson extends Model
             }
         }
 
-        // Asignar mesón al usuario actual
         $user->meson_id = $this->id;
         $user->save();
 
-        // Marcar mesón como ocupado
+        // Aquí basta con cambiar disponible, el mutator actualiza estado
         $this->disponible = false;
         $this->save();
     }
 
-    /**
-     * Libera este mesón del usuario asignado.
-     */
     public function liberar(): void
     {
         if ($user = $this->usuario) {

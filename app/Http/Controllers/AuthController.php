@@ -35,7 +35,7 @@ class AuthController extends Controller
 
         return match ($user->rol) {
             'administrador' => redirect()->route('Admin.usuarios.index'),
-            'funcionario' => redirect()->route('funcionario.dashboard'),
+            'funcionario' => redirect()->route('funcionario.centro-mando'),
             'soporte' => redirect()->route('soporte.index'),
             default => redirect('/'),
         };
