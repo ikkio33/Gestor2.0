@@ -35,7 +35,7 @@ class Turno extends Model
 
     public function servicio()
     {
-        return $this->belongsTo(Servicio::class,);
+        return $this->belongsTo(Servicio::class, 'servicio_id');
     }
 
     public function meson()
@@ -47,6 +47,10 @@ class Turno extends Model
     {
         return $this->belongsTo(Materia::class);
     }
+    public function usuario()
+    {
+        return $this->belongsTo(Usuarios::class, 'usuario_id');
+    }
 
     protected static function booted()
     {
@@ -54,5 +58,4 @@ class Turno extends Model
             $turno->codigo_turno = Str::random(10);
         });
     }
-    
 }

@@ -82,7 +82,7 @@
                                             @foreach($materiasPorServicio[$servicio->id] as $materia)
                                                 <form method="POST" action="{{ route('totem.confirmar') }}" class="mb-2">
                                                     @csrf
-                                                    <input type="hidden" name="rut" value="{{ $rut }}">
+                                                    <input type="hidden" name="rut" value="{{ $identificacion }}">
                                                     <input type="hidden" name="servicio_id" value="{{ $servicio->id }}">
                                                     <input type="hidden" name="materia_id" value="{{ $materia->id }}">
                                                     <button type="submit" class="btn btn-outline-primary w-100">
@@ -129,7 +129,7 @@
                                 @foreach($materiasPorServicio[$servicio->id] as $materia)
                                     <form method="POST" action="{{ route('totem.confirmar') }}" class="mb-2">
                                         @csrf
-                                        <input type="hidden" name="rut" value="{{ $rut }}">
+                                        <input type="hidden" name="rut" value="{{ $identificacion }}">
                                         <input type="hidden" name="servicio_id" value="{{ $servicio->id }}">
                                         <input type="hidden" name="materia_id" value="{{ $materia->id }}">
                                         <button type="submit" class="btn btn-outline-primary w-100">
@@ -140,7 +140,7 @@
                             @else
                                 <form method="POST" action="{{ route('totem.confirmar') }}">
                                     @csrf
-                                    <input type="hidden" name="rut" value="{{ $rut }}">
+                                    <input type="hidden" name="rut" value="{{ $identificacion }}">
                                     <input type="hidden" name="servicio_id" value="{{ $servicio->id }}">
                                     <button type="submit" class="btn btn-outline-secondary w-100">
                                         Seleccionar Servicio

@@ -7,30 +7,23 @@ use Illuminate\Support\Facades\Hash;
 
 class Usuarios extends Authenticatable
 {
-    protected $fillable = ['nombre', 'email', 'password', 'rol', 'meson_id'];
+    protected $fillable = ['nombre', 'email', 'password', 'rol'];
 
-    protected $username = 'nombre';
-
+    // Un funcionario tiene un mesón asignado (1 a 1)
     public function meson()
     {
-        return $this->belongsTo(Meson::class, 'meson_id');
+        return $this->hasOne(Meson::class, 'funcionario_id', 'id');
     }
 
+    // Turnos del usuario
     public function turnos()
     {
         return $this->hasMany(Turno::class, 'usuario_id');
     }
 
-    /**
-     * Establece la contraseña cifrada antes de guardar en la base de datos
-     *
-     * @param  string  $password
-     * @return void
-     */
     public function setPasswordAttribute($password)
     {
         if (!empty($password)) {
-            // Evitar rehashear una contraseña ya hasheada
             if (Hash::needsRehash($password)) {
                 $this->attributes['password'] = Hash::make($password);
             } else {

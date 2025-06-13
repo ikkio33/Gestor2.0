@@ -8,9 +8,8 @@ use App\Http\Controllers\Admin\UsuarioController;
 use App\Http\Controllers\Admin\EstadisticasController;
 use App\Http\Controllers\Admin\MesonController;
 use App\Http\Controllers\Admin\OrganizadorController;
-use App\Http\Controllers\Funcionario\DashboardController;
 use App\Http\Controllers\Funcionario\CentroMandoController;
-use App\Http\Controllers\Funcionario\TurnoController as FuncionarioTurnoController;
+use App\Http\Controllers\Admin\AsignacionController;
 use App\Http\Controllers\TurnoEstadoController;
 use App\Http\Controllers\PublicoAjaxController;
 use App\Http\Controllers\ApiTurnoController;
@@ -29,12 +28,17 @@ Route::view('/gesnot/turnos', 'publico.turnos')->name('gesnot.turnos');
 Route::get('/turno/{codigo}', [ApiTurnoController::class, 'mostrarPorCodigo']);
 Route::get('turnos/{codigo}', [ApiTurnoController::class, 'mostrarPorCodigo']);
 Route::get('/turno-actual-publico', [TurnoController::class, 'turnoActualPublico']);
+Route::get('/publico/turno-en-atencion', [CentroMandoController::class, 'turnoEnAtencionPublico']);
+
 
 
 
 
 // Totem
 Route::get('/ingresar-rut', [TotemController::class, 'show'])->name('totem.show');
+Route::get('/totem/pasaporte', [App\Http\Controllers\TotemController::class, 'pasaporte'])->name('totem.pasaporte');
+Route::post('/totem/pasaporte', [App\Http\Controllers\TotemController::class, 'selectPasaporte'])->name('totem.selectPasaporte');
+
 Route::post('/seleccionar', [TotemController::class, 'select'])->name('totem.select');
 Route::post('/totem/confirmar', [TotemController::class, 'confirmar'])->name('totem.confirmar');
 Route::get('/totem/confirmacion', [TotemController::class, 'confirmacion'])->name('totem.confirmacion');
@@ -49,6 +53,11 @@ Route::middleware(['auth', 'role:administrador'])
         Route::resource('usuarios', UsuarioController::class);
         Route::get('estadisticas', [EstadisticasController::class, 'index'])->name('estadisticas.index');
         Route::resource('mesones', MesonController::class)->except(['show']);
+        //rutas para asignacion de mesones a funcionarios
+        Route::get('asignaciones', [AsignacionController::class, 'index'])->name('asignaciones.index');
+        Route::post('asignaciones', [AsignacionController::class, 'store'])->name('asignaciones.store');
+        Route::post('asignaciones/liberar', [AsignacionController::class, 'liberar'])->name('asignaciones.liberar');
+
 
         Route::prefix('organizador')->name('organizador.')->group(function () {
             Route::get('/', [OrganizadorController::class, 'index'])->name('index');
@@ -71,22 +80,20 @@ Route::middleware(['auth'])
     ->prefix('funcionario')
     ->name('funcionario.')
     ->group(function () {
-        // Ruta para mostrar la vista con mesones disponibles
         Route::get('/centro-mando', [CentroMandoController::class, 'index'])->name('centro-mando');
-
-        // Ruta AJAX para obtener mesones disponibles
         Route::get('/mesones-disponibles', [CentroMandoController::class, 'mesonesDisponiblesAjax'])->name('centro-mando.mesones-disponibles');
 
-        /*
-        Route::post('/centro-mando/asignar-meson', [CentroMandoController::class, 'asignarMeson'])->name('centro-mando.asignarMeson');
-        Route::post('/centro-mando/liberar-meson', [CentroMandoController::class, 'liberarMeson'])->name('centro-mando.liberarMeson');
+        // AJAX GET
         Route::get('/centro-mando/turnos-pendientes', [CentroMandoController::class, 'turnosPendientes'])->name('centro-mando.turnosPendientes');
+        Route::get('/centro-mando/turno-en-atencion', [CentroMandoController::class, 'turnoEnAtencion'])->name('centro-mando.turnoEnAtencion');
+
+        // AJAX POST
         Route::post('/centro-mando/llamar-turno', [CentroMandoController::class, 'llamarTurno'])->name('centro-mando.llamarTurno');
         Route::post('/centro-mando/cancelar-turno', [CentroMandoController::class, 'cancelarTurno'])->name('centro-mando.cancelarTurno');
-        Route::post('/centro-mando/terminar-atencion', [CentroMandoController::class, 'terminarAtencion'])->name('centro-mando.terminarAtencion');
-        Route::post('/centro-mando/rellamar-turno', [CentroMandoController::class, 'rellenarTurno'])->name('centro-mando.rellamarTurno');
-        */
+        Route::post('/centro-mando/finalizar-turno', [CentroMandoController::class, 'finalizarTurno'])->name('centro-mando.finalizarTurno');
+        Route::post('/centro-mando/rellamar-turno', [CentroMandoController::class, 'rellamarTurno'])->name('centro-mando.rellamarTurno');
     });
+
 
 
 

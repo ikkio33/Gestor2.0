@@ -1,88 +1,74 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Guardamos los códigos actuales para detectar cambios
-    let turnosActualesCodigos = [];
+let ultimoCodigo = null;
+let turnosAnunciados = new Set();
 
-    async function cargarTurnoActual() {
-        try {
-            console.log('[INFO] Llamando al servidor para verificar turnos nuevos...');
+document.addEventListener('DOMContentLoaded', function () {
+    cargarTurnosEnAtencion();
+    setInterval(cargarTurnosEnAtencion, 3000);
+});
 
-            const response = await fetch('/turno-actual-publico');
+function cargarTurnosEnAtencion() {
+    fetch('/publico/turno-en-atencion')
+        .then(response => response.json())
+        .then(data => {
+            const contenedor = document.getElementById('contenedor-turnos-en-atencion');
+            if (!contenedor) return;
 
-            const contentType = response.headers.get('content-type') || '';
-            if (!contentType.includes('application/json')) {
-                throw new Error('Respuesta no es JSON, posible redirección o error.');
-            }
+            const turnos = data.turnos || [];
 
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('[DEBUG] Turnos actuales recibidos:', data);
-
-            const turnosList = document.querySelector('.turnos-list');
-            if (!turnosList) {
-                console.warn('[WARN] No se encontró el contenedor .turnos-list en el DOM.');
+            if (turnos.length === 0) {
+                if (!contenedor.querySelector('.no-turnos-box')) {
+                    contenedor.innerHTML = `
+                        <div class="no-turnos-box">
+                            <p>No hay turnos en atención en este momento.</p>
+                        </div>`;
+                }
                 return;
             }
 
-            if (data.nuevo && Array.isArray(data.turnos) && data.turnos.length > 0) {
-                // Extraemos los códigos actuales para comparar
-                const nuevosCodigos = data.turnos.map(t => t.codigo);
+            if (turnos[0].codigo === ultimoCodigo) return;
+            ultimoCodigo = turnos[0].codigo;
 
-                // Detectamos si hay algún código nuevo que no estaba antes
-                const hayTurnoNuevo = nuevosCodigos.some(codigo => !turnosActualesCodigos.includes(codigo));
+            contenedor.innerHTML = '';
 
-                if (hayTurnoNuevo) {
-                    console.log('[INFO] Nuevo/actualizado turno detectado:', nuevosCodigos);
+            turnos.slice(0, 5).forEach((turno, index) => {
+                const esNuevo = index === 0 && turno.es_nuevo;
+                const claseNuevo = esNuevo ? 'new-turno' : '';
 
-                    turnosActualesCodigos = nuevosCodigos;
-
-                    // Generamos el HTML para todos los turnos
-                    turnosList.innerHTML = data.turnos.map(t => `
-                        <div class="turno-box shadow new-turno">
-                            <div class="d-flex justify-content-center align-items-center flex-nowrap gap-4 overflow-auto">
-                                <span class="badge bg-primary badge-turno">${t.codigo}</span>
-                                <span class="fw-bold text-truncate" style="max-width: 25%; white-space: nowrap;">${t.servicio}</span>
-                                <span class="text-muted d-inline-flex align-items-center">
-                                    <i class="fas fa-desktop me-1"></i> Mesón ${t.meson}
-                                </span>
-                            </div>
+                const turnoHTML = `
+                    <div class="turno-box shadow ${claseNuevo}">
+                        <div class="d-flex justify-content-center align-items-center flex-nowrap gap-4 overflow-auto">
+                            <span class="badge bg-primary badge-turno">${turno.codigo}</span>
+                            <span class="fw-bold text-truncate" style="max-width: 25%; white-space: nowrap;">
+                                ${turno.nombre_servicio ?? 'Servicio desconocido'}
+                            </span>
+                            <span class="text-muted d-inline-flex align-items-center">
+                                <i class="fas fa-desktop me-1"></i> Mesón ${turno.meson_nombre ?? 'N/D'}
+                            </span>
                         </div>
-                    `).join('');
-
-                    // Reproducir audio y voz para el primer turno (el más reciente)
-                    const primerTurno = data.turnos[0];
-                    const audio = new Audio('/assets/audio/turno_llamado.mp3');
-                    await audio.play();
-
-                    const mensaje = `Turno ${primerTurno.codigo}, diríjase al mesón ${primerTurno.meson}.`;
-                    const voz = new SpeechSynthesisUtterance(mensaje);
-                    voz.lang = 'es-CL';
-                    speechSynthesis.speak(voz);
-
-                } else {
-                    console.log('[INFO] Los turnos actuales no cambiaron, no actualizamos DOM ni audio.');
-                }
-
-            } else if (!data.nuevo) {
-                console.log('[INFO] No hay turnos nuevos.');
-                turnosActualesCodigos = []; // Reiniciamos para detectar futuro turno nuevo
-
-                turnosList.innerHTML = `
-                    <div class="no-turnos-box">
-                        <p>No hay turnos en atención en este momento.</p>
                     </div>
                 `;
-            } else {
-                console.log('[INFO] Formato inesperado o datos incompletos.');
-            }
 
-        } catch (error) {
-            console.error('Error al cargar turnos actuales:', error);
-        }
-    }
+                contenedor.insertAdjacentHTML('beforeend', turnoHTML);
 
-    cargarTurnoActual();
-    setInterval(cargarTurnoActual, 5000);
-});
+                if (esNuevo) {
+                    reproducirAudio(turno.codigo, turno.meson_nombre);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error al obtener los turnos en atención:', error);
+        });
+}
+
+function reproducirAudio(codigo, meson) {
+    if (turnosAnunciados.has(codigo)) return;
+    turnosAnunciados.add(codigo);
+
+    const audio = new Audio('/assets/audio/turno_llamado.mp3');
+    audio.play();
+
+    const mensaje = `Turno ${codigo}, diríjase al mesón ${meson}.`;
+    const voz = new SpeechSynthesisUtterance(mensaje);
+    voz.lang = "es-CL";
+    speechSynthesis.speak(voz);
+}

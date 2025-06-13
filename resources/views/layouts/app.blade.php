@@ -37,6 +37,14 @@
                         <i class="bi bi-book me-2"></i>Servicios
                     </a>
                 </li>
+
+                <!-- Nueva entrada para asignar funcionarios a mesones -->
+                <li class="nav-item mb-2">
+                    <a class="nav-link" href="{{ route('Admin.asignaciones.index') }}">
+                        <i class="bi bi-person-badge me-2"></i>Asignar Funcionario a Mesón
+                    </a>
+                </li>
+
                 <li class="nav-item mb-2">
                     <a class="nav-link" href="{{ route('Admin.estadisticas.index') }}">
                         <i class="bi bi-bar-chart me-2"></i>Estadísticas

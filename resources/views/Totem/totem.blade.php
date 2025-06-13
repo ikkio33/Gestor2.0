@@ -44,6 +44,13 @@
                             class="keyboard-key btn-success">
                         Continuar
                     </button>
+
+                    <!-- Botón nuevo para ingreso por pasaporte -->
+                    <a href="{{ route('totem.pasaporte') }}" 
+                       class="keyboard-key btn-warning" 
+                       style="margin-left: 8px;">
+                        Pasaporte
+                    </a>
                 </div>
             </form>
         </div>

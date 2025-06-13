@@ -2,152 +2,212 @@
 
 namespace App\Http\Controllers\Funcionario;
 
-use Illuminate\Http\Request;
-use App\Models\Meson;
-use App\Models\Turno;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Turno;
+use App\Models\Servicio;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Models\Meson;
 
 class CentroMandoController extends Controller
 {
-    // Mostrar vista con mesones disponibles
+    // Vista principal del centro de mando
     public function index()
     {
-        // Obtener mesones disponibles
-        $mesonesDisponibles = Meson::whereIn('estado', ['libre', 'disponible'])->get();
-
-        return view('funcionario.centro-mando', compact('mesonesDisponibles'));
+        return view('funcionario.centro-mando');
     }
 
-    // AJAX: Obtener mesones disponibles (solo para la llamada AJAX)
-    public function mesonesDisponiblesAjax()
-    {
-        $mesonesDisponibles = Meson::whereIn('estado', ['libre', 'disponible'])->get();
-
-        // Nota: clave 'mesonesDisponibles' para que coincida con el JS
-        return response()->json(['mesonesDisponibles' => $mesonesDisponibles]);
-    }
-
-
-    /*
-    // AJAX: Asignar meson al usuario actual
-    public function asignarMeson(Request $request)
-    {
-        $usuario = Auth::user();
-        $meson = Meson::where('id', $request->meson_id)->where('estado', 'disponible')->first();
-
-        if (!$meson) {
-            return response()->json(['error' => 'Mesón no disponible'], 400);
-        }
-
-        $meson->estado = 'asignado';
-        $meson->funcionario_id = $usuario->id;
-        $meson->save();
-
-        return response()->json(['success' => true, 'meson' => $meson]);
-    }
-
-    // AJAX: Liberar meson asignado
-    public function liberarMeson(Request $request)
-    {
-        $usuario = Auth::user();
-        $meson = Meson::where('id', $request->meson_id)->where('funcionario_id', $usuario->id)->first();
-
-        if (!$meson) {
-            return response()->json(['error' => 'Mesón no asignado a este usuario'], 400);
-        }
-
-        $meson->estado = 'disponible';
-        $meson->usuario_asignado = null;
-        $meson->save();
-
-        return response()->json(['success' => true]);
-    }
-
-    // AJAX: Obtener turnos pendientes para los mesones asignados (máx 3 por código_servicio)
+    // Obtener turnos pendientes del día actual, agrupados por servicio (máximo 3 por grupo)
     public function turnosPendientes()
     {
-        $usuario = Auth::user();
-        $mesonesAsignados = Meson::where('funcionario_id', $usuario->id)->pluck('nombre');
+        $hoy = Carbon::today();
 
-        $turnos = Turno::whereIn('meson_asignado', $mesonesAsignados)
-            ->where('estado', 'pendiente')
-            ->orderBy('created_at')
+        // Obtener los mesones asignados al funcionario autenticado
+        $funcionarioId = Auth::id();
+        $mesonesAsignados = Meson::where('funcionario_id', $funcionarioId)->pluck('id');
+
+        if ($mesonesAsignados->isEmpty()) {
+            return response()->json(['turnos' => []]); // Sin mesones asignados, sin turnos
+        }
+
+        // Obtener IDs de servicios asociados a esos mesones
+        $serviciosIds = DB::table('meson_servicio')
+            ->whereIn('meson_id', $mesonesAsignados)
+            ->pluck('servicio_id')
+            ->unique();
+
+        if ($serviciosIds->isEmpty()) {
+            return response()->json(['turnos' => []]); // Sin servicios asignados, sin turnos
+        }
+
+        // Obtener turnos pendientes filtrados por servicios asignados
+        $turnos = Turno::where('estado', 'pendiente')
+            ->whereDate('created_at', $hoy)
+            ->whereIn('servicio_id', $serviciosIds)
+            ->with('servicio')
             ->get()
-            ->groupBy('codigo_servicio')
-            ->map(function ($group) {
-                return $group->take(3);
-            });
+            ->groupBy('servicio_id');
 
-        return response()->json(['turnos' => $turnos]);
+        $response = [];
+
+        foreach ($turnos as $servicioId => $grupo) {
+            $servicio = $grupo->first()->servicio;
+            if (!$servicio) continue;
+
+            $response[$servicio->nombre] = $grupo->take(3)->map(function ($turno) {
+                return [
+                    'id' => $turno->id,
+                    'codigo' => $turno->codigo_turno,
+                    'tiempo_espera' => $turno->created_at->diffForHumans(null, true),
+                ];
+            });
+        }
+
+        return response()->json(['turnos' => $response]);
+    }
+    // Obtener turno actualmente en atención, incluyendo servicio y mesón
+    public function turnoEnAtencion()
+    {
+        $usuario = Auth::user();
+
+        if (!$usuario || !$usuario->meson) {
+            return response()->json(['turno' => null]);
+        }
+
+        $mesonId = $usuario->meson->id;
+
+        $turno = Turno::where('estado', 'atendiendo')
+            ->whereHas('usuario.meson', function ($query) use ($mesonId) {
+                $query->where('id', $mesonId);
+            })
+            ->with(['servicio', 'usuario.meson'])
+            ->first();
+
+        if (!$turno) {
+            return response()->json(['turno' => null]);
+        }
+
+        return response()->json([
+            'turno' => [
+                'id' => $turno->id,
+                'codigo' => $turno->codigo_turno,
+                'nombre_servicio' => $turno->servicio->nombre ?? 'Servicio desconocido',
+                'estado' => $turno->estado,
+                'updated_at' => $turno->updated_at,
+                'meson_nombre' => $turno->usuario && $turno->usuario->meson
+                    ? $turno->usuario->meson->nombre
+                    : 'Mesón desconocido',
+            ]
+        ]);
     }
 
-    // AJAX: Llamar turno (pasar a 'atendiendo')
+
+    // Llamar un turno: cambia el estado a "atendiendo"
     public function llamarTurno(Request $request)
     {
-        $turno = Turno::where('id', $request->turno_id)->where('estado', 'pendiente')->first();
-
-        if (!$turno) {
-            return response()->json(['error' => 'Turno no disponible para llamar'], 400);
-        }
-
+        $turno = Turno::findOrFail($request->turno_id);
         $turno->estado = 'atendiendo';
+        $turno->usuario_id = Auth::id(); // ← Asignamos el funcionario que llama
         $turno->save();
 
-        return response()->json(['success' => true, 'turno' => $turno]);
+        return response()->json(['success' => true]);
     }
 
-    // AJAX: Cancelar turno (pasar a 'abandono')
+    // Rellamar a un turno: útil para efectos visuales/sonoros en el frontend
+    // Rellamar un turno: solo actualiza updated_at para marcar nueva llamada
+    public function rellamarTurno(Request $request)
+    {
+        $turno = Turno::findOrFail($request->turno_id);
+
+        if ($turno->estado !== 'atendiendo') {
+            return response()->json([
+                'success' => false,
+                'message' => 'El turno no está en atención, no se puede re-llamar.'
+            ], 400);
+        }
+
+        $turno->touch(); // Actualiza updated_at automáticamente
+        return response()->json(['success' => true]);
+    }
+
+    // Cancelar turno: cambia estado 
     public function cancelarTurno(Request $request)
     {
-        $turno = Turno::where('id', $request->turno_id)->whereIn('estado', ['pendiente', 'atendiendo'])->first();
-
-        if (!$turno) {
-            return response()->json(['error' => 'Turno no válido para cancelar'], 400);
-        }
-
-        $turno->estado = 'abandono';
+        $turno = Turno::findOrFail($request->turno_id);
+        $turno->estado = 'cancelado';
         $turno->save();
-
-        return response()->json(['success' => true]);
     }
 
-    // AJAX: Terminar atención (liberar turno atendiendo)
-    public function terminarAtencion(Request $request)
+    // Finalizar la atención de un turno
+    public function finalizarTurno(Request $request)
     {
-        $turno = Turno::where('id', $request->turno_id)->where('estado', 'atendiendo')->first();
-
-        if (!$turno) {
-            return response()->json(['error' => 'Turno no está en atención'], 400);
-        }
-
-        $turno->estado = 'finalizado';
+        $turno = Turno::findOrFail($request->turno_id);
+        $turno->estado = 'atendido';
         $turno->save();
-
-        return response()->json(['success' => true]);
     }
 
-    // AJAX: Re-llamar turno (quizás para alertar al cliente otra vez)
-    public function rellenarTurno(Request $request)
+    public function asignarMeson(Request $request)
     {
-        $turno = Turno::where('id', $request->turno_id)->where('estado', 'atendiendo')->first();
+        $request->validate([
+            'meson_id' => 'required|integer|exists:mesones,id',
+        ]);
 
-        if (!$turno) {
-            return response()->json(['error' => 'Turno no está en atención'], 400);
+        $meson = Meson::findOrFail($request->meson_id);
+        $meson->funcionario_id = Auth::id(); // Asignar el usuario actual (funcionario) al mesón
+        $meson->save();
+
+        return response()->json(['success' => true, 'message' => 'Mesón asignado correctamente.']);
+    }
+
+    public function turnoEnAtencionPublico()
+    {
+        $turnos = Turno::where('estado', 'atendiendo')
+            ->with(['servicio', 'usuario.meson'])
+            ->orderBy('updated_at', 'desc') // los más recientes primero
+            ->take(4) // máximo 4 turnos
+            ->get();
+
+        if ($turnos->isEmpty()) {
+            return response()->json(['turnos' => []]);
         }
 
-        // Aquí puedes lanzar notificaciones, sonidos, o lo que se necesite para el re-llamado
+        // Formatear turnos
+        $turnosFormateados = $turnos->map(function ($turno) {
+            return [
+                'id' => $turno->id,
+                'codigo' => $turno->codigo_turno,
+                'nombre_servicio' => $turno->servicio->nombre ?? 'Servicio desconocido',
+                'updated_at' => $turno->updated_at,
+                'meson_nombre' => $turno->usuario && $turno->usuario->meson
+                    ? $turno->usuario->meson->nombre
+                    : 'Mesón desconocido',
+            ];
+        });
 
-        return response()->json(['success' => true]);
+        return response()->json(['turnos' => $turnosFormateados]);
     }
 
-    // Liberar meson al cerrar sesión (hook logout)
-    public function liberarMesonLogout()
+
+    public function turnosEnAtencionPublicoTodos()
     {
-        $usuario = Auth::user();
+        $turnos = Turno::where('estado', 'atendiendo')
+            ->with(['servicio', 'usuario.meson'])
+            ->get();
 
-        Meson::where('funcionario_id', $usuario->id)
-            ->update(['estado' => 'disponible', 'usuario_asignado' => null]);
+        $resultado = $turnos->map(function ($turno) {
+            return [
+                'id' => $turno->id,
+                'codigo' => $turno->codigo_turno,
+                'nombre_servicio' => $turno->servicio->nombre ?? 'Servicio desconocido',
+                'updated_at' => $turno->updated_at,
+                'meson_nombre' => $turno->usuario && $turno->usuario->meson
+                    ? $turno->usuario->meson->nombre
+                    : 'Mesón desconocido',
+            ];
+        });
+
+        return response()->json(['turnos' => $resultado]);
     }
-    */
 }

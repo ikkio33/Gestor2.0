@@ -1,57 +1,72 @@
 @extends('layouts.funcionario')
 
 @section('content')
-<div class="centro-mando-container mt-4">
-    <h2>Centro de Mando - Funcionario: {{ Auth::user()->nombre }}</h2>
+<div class="container mt-4">
+    <h2 class="mb-4">Centro de Mando - Funcionario: {{ Auth::user()->nombre }}</h2>
 
-    {{-- Botones para mostrar/ocultar --}}
-    <div class="mb-3">
-        <button id="toggleMesonesBtn" class="btn btn-primary me-2">Mostrar/Ocultar Mesones</button>
-    </div>
-
-    {{-- Sección Mesones --}}
-    <div id="mesonesSection" class="mesones-grid mb-4">
-        <!-- Columna: Mesones Disponibles -->
-        <section id="mesonesDisponiblesSection" class="mesones-columna">
-            <div id="mesonesDisponiblesWrapper" class="mesones-scroll-container">
-                <div class="header">
-                    <h4>Mesones Disponibles</h4>
+    <div class="row">
+        {{-- Columna: Turnos Pendientes --}}
+        <div class="col-md-6">
+            <section id="turnosPendientesSection" class="card shadow-sm mb-4" style="max-height: 600px; overflow-y: auto;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Turnos Pendientes</h5>
                 </div>
-                <div id="mesonesDisponiblesList" class="mesones-lista">
-                    {{-- Aquí se cargarán los mesones disponibles dinámicamente --}}
+                <div class="card-body" id="turnosPendientesList">
+                    {{-- Turnos cargados vía AJAX --}}
                 </div>
-            </div>
-        </section>
-
-        <!-- Columna: Mesones Asignados -->
-        <section id="mesonesAsignadosSection" class="mesones-columna">
-            <div id="mesonesAsignadosWrapper" class="mesones-scroll-container">
-                <h4>Mesones Asignados</h4>
-                <div id="mesonesAsignadosList" class="mesones-lista">
-                    {{-- Aquí se cargarán los mesones asignados dinámicamente --}}
+                <div id="mensajePendientesVacio" class="text-center text-muted p-3" style="display: none;">
+                    <strong>Bandeja vacía</strong><br>
+                    No hay turnos pendientes.
                 </div>
-            </div>
-        </section>
-    </div>
-
-    {{-- Sección Turnos Pendientes --}}
-    <section id="turnosPendientesSection" class="turnos-section mb-4" style="display:none;">
-        <h4>Turnos Pendientes</h4>
-        <div id="turnosPendientesList">
-            {{-- Aquí cargará la lista de turnos pendientes vía AJAX --}}
+            </section>
         </div>
-    </section>
 
-    {{-- Sección Turno en Atención --}}
-    <section id="turnoAtencionSection" class="turnos-section" style="display:none;">
-        <h4>Turno en Atención</h4>
-        <div id="turnoAtencionContent">
-            {{-- Aquí cargará el turno en atención vía AJAX --}}
+        {{-- Columna: Turno en Atención --}}
+        <div class="col-md-6">
+            <section id="turnoAtencionSection" class="card shadow-sm mb-4" style="position: relative;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Turno en Atención</h5>
+                </div>
+                <div class="card-body" id="turnoAtencionContent" style="position: relative;">
+                    {{-- Turno cargado vía AJAX --}}
+
+                    {{-- Indicador pequeño para rellamadas --}}
+                    <div id="contadorRellamadas" style="
+                        position: absolute;
+                        bottom: 8px;
+                        right: 12px;
+                        font-size: 0.75rem;
+                        color: #555;
+                        opacity: 0.7;
+                        user-select: none;
+                    ">
+                        Rellamado 0 veces
+                    </div>
+
+                    {{-- Animación sutil de rellamado --}}
+                    <div id="animacionRellamado" style="
+                        position: absolute;
+                        bottom: 8px;
+                        right: 80px;
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background-color: #28a745;
+                        opacity: 0;
+                        pointer-events: none;
+                        transition: opacity 0.3s ease;
+                    "></div>
+                </div>
+                <div id="mensajeAtencionVacio" class="text-center text-muted p-3" style="display: none;">
+                    <strong>Bandeja vacía</strong><br>
+                    No hay turnos en atención.
+                </div>
+            </section>
         </div>
-    </section>
+    </div>
 </div>
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/funcionario/centro_mando.js') }}"></script>
+<script src="{{ asset('js/funcionario/centro-mando.js') }}"></script>
 @endpush

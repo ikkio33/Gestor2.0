@@ -13,10 +13,26 @@ class TotemController extends Controller
         return view('totem.totem');
     }
 
+    // Método para procesar ingreso RUT
     public function select(Request $request)
     {
         $request->validate([
-            'rut' => ['required', 'regex:/^\d{1,2}\.?\d{3}\.?\d{3}-[\dKk]$/']
+            'rut' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $value = trim($value);
+
+                    if (self::esRut($value)) {
+                        if (!self::validarRut($value)) {
+                            $fail('El RUT ingresado no es válido. Revisa el dígito verificador.');
+                        }
+                    } elseif (self::esPasaporte($value)) {
+                        // OK, es un pasaporte válido (pero acá es raro que pase, igual lo dejamos)
+                    } else {
+                        $fail('Debe ingresar un RUT chileno válido o un pasaporte válido.');
+                    }
+                },
+            ],
         ]);
 
         $rut = $request->input('rut');
@@ -25,7 +41,7 @@ class TotemController extends Controller
             ->where('rut', $rut)
             ->first();
 
-        if (! $compareciente) {
+        if (!$compareciente) {
             DB::table('compareciente')->insert([
                 'rut'        => $rut,
                 'created_at' => now(),
@@ -47,33 +63,101 @@ class TotemController extends Controller
             $materiasPorServicio[$materia->servicio_id][] = $materia;
         }
 
-        return view('totem.seleccionar', compact('rut', 'servicios', 'materiasPorServicio'));
+        // PASAMOS una variable común "identificacion" para que la vista funcione igual
+        return view('totem.seleccionar', [
+            'identificacion' => $rut,
+            'servicios' => $servicios,
+            'materiasPorServicio' => $materiasPorServicio,
+        ]);
+    }
+
+    // Método para procesar ingreso de pasaporte
+    public function selectPasaporte(Request $request)
+    {
+        $request->validate([
+            'pasaporte' => ['required', 'alpha_num', 'min:5', 'max:20'],
+        ], [
+            'pasaporte.alpha_num' => 'El pasaporte debe contener solo letras y números.',
+        ]);
+
+        $pasaporte = $request->input('pasaporte');
+
+        $compareciente = DB::table('compareciente')
+            ->where('pasaporte', $pasaporte)
+            ->first();
+
+        if (!$compareciente) {
+            DB::table('compareciente')->insert([
+                'pasaporte'  => $pasaporte,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $servicios = DB::table('servicios')
+            ->orderBy('letra')
+            ->orderBy('nombre')
+            ->get();
+
+        $materias = DB::table('materias')
+            ->orderBy('nombre')
+            ->get();
+
+        $materiasPorServicio = [];
+        foreach ($materias as $materia) {
+            $materiasPorServicio[$materia->servicio_id][] = $materia;
+        }
+
+        // PASAMOS la variable común "identificacion" para usarla igual en la vista
+        return view('totem.seleccionar', [
+            'identificacion' => $pasaporte,
+            'servicios' => $servicios,
+            'materiasPorServicio' => $materiasPorServicio,
+        ]);
     }
 
     public function confirmar(Request $request)
     {
         $data = $request->validate([
-            'rut'          => ['required', 'regex:/^\d{1,2}\.?\d{3}\.?\d{3}-[\dKk]$/'],
+            'rut' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $value = trim($value);
+
+                    if (self::esRut($value)) {
+                        if (!self::validarRut($value)) {
+                            $fail('El RUT ingresado no es válido. Revisa el dígito verificador.');
+                        }
+                    } elseif (self::esPasaporte($value)) {
+                        // OK
+                    } else {
+                        $fail('Debe ingresar un RUT chileno válido o un pasaporte válido.');
+                    }
+                },
+            ],
             'servicio_id'  => ['required', 'integer'],
             'materia_id'   => ['nullable', 'integer'],
         ]);
 
         $compareciente = DB::table('compareciente')
             ->where('rut', $data['rut'])
+            ->orWhere('pasaporte', $data['rut'])
             ->first();
 
         $comparecienteId = $compareciente
             ? $compareciente->id
             : DB::table('compareciente')->insertGetId([
-                'rut'        => $data['rut'],
+                'rut'        => self::esRut($data['rut']) ? $data['rut'] : null,
+                'pasaporte'  => self::esPasaporte($data['rut']) ? $data['rut'] : null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
         $servicio = DB::table('servicios')->find($data['servicio_id']);
-        if (! $servicio) {
+        if (!$servicio) {
             return back()->withErrors(['servicio_id' => 'Servicio no válido.']);
         }
+
         $letra = $servicio->letra;
 
         $maxHoy = DB::table('turnos')
@@ -105,22 +189,20 @@ class TotemController extends Controller
     {
         $codigo = $request->query('codigo');
 
-        if (! $codigo) {
+        if (!$codigo) {
             return redirect()->route('totem.show')->with('error', 'Falta el código para mostrar la confirmación.');
         }
 
-        // 1. Buscar el turno actual por código
         $turnoActual = DB::table('turnos')
             ->where('codigo_turno', $codigo)
             ->first();
 
-        if (! $turnoActual) {
+        if (!$turnoActual) {
             return redirect()->route('totem.show')->with('error', 'Turno no encontrado.');
         }
 
         $servicioId = $turnoActual->servicio_id;
 
-        // 2. Turnos pendientes SOLO del MISMO servicio
         $turnosPendientes = DB::table('turnos')
             ->where('servicio_id', $servicioId)
             ->where('estado', 'pendiente')
@@ -128,7 +210,6 @@ class TotemController extends Controller
             ->orderBy('numero_turno')
             ->get();
 
-        // 3. Turnos en atención SOLO del MISMO servicio
         $turnosAtendiendo = DB::table('turnos')
             ->where('servicio_id', $servicioId)
             ->where('estado', 'atendiendo')
@@ -136,17 +217,68 @@ class TotemController extends Controller
             ->orderBy('updated_at', 'desc')
             ->get();
 
-        // 4. URL QR sin rut
-        $url = 'http://127.0.0.1:8000/gesnot/turnos?codigo=' . urlencode($codigo);
+        $url = url('/gesnot/turnos?codigo=' . urlencode($codigo));
         $qr = QrCode::size(200)->generate($url);
 
-        // 5. Retornar vista con turno actual, pendientes y en atención del mismo servicio
         return view('totem.confirmacion', [
-            'qr' => $qr,
-            'codigo' => $codigo,
-            'turnoActual' => $turnoActual,
+            'qr'               => $qr,
+            'codigo'           => $codigo,
+            'turnoActual'      => $turnoActual,
             'turnosPendientes' => $turnosPendientes,
             'turnosAtendiendo' => $turnosAtendiendo,
         ]);
+    }
+
+    /**
+     * Determina si el input parece un RUT (estructura con guion y puntos opcionales)
+     */
+    private static function esRut($valor)
+    {
+        return preg_match('/^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$/', $valor);
+    }
+
+    /**
+     * Valida el RUT chileno con dígito verificador correcto
+     */
+    private static function validarRut($rutCompleto)
+    {
+        $rut = strtoupper(preg_replace('/[^0-9kK]/', '', $rutCompleto));
+
+        if (strlen($rut) < 2) return false;
+
+        $cuerpo = substr($rut, 0, -1);
+        $dv = substr($rut, -1);
+
+        if (!ctype_digit($cuerpo)) return false;
+
+        $suma = 0;
+        $multiplo = 2;
+
+        for ($i = strlen($cuerpo) - 1; $i >= 0; $i--) {
+            $suma += $multiplo * intval($cuerpo[$i]);
+            $multiplo = $multiplo == 7 ? 2 : $multiplo + 1;
+        }
+
+        $resto = $suma % 11;
+        $dvEsperado = 11 - $resto;
+
+        if ($dvEsperado == 11) $dvEsperado = '0';
+        elseif ($dvEsperado == 10) $dvEsperado = 'K';
+        else $dvEsperado = (string)$dvEsperado;
+
+        return $dv === $dvEsperado;
+    }
+
+    /**
+     * Verifica si el valor tiene un formato de pasaporte válido
+     */
+    private static function esPasaporte($valor)
+    {
+        return preg_match('/^[A-Z0-9]{6,12}$/i', $valor);
+    }
+
+    public function pasaporte()
+    {
+        return view('totem.pasaporte'); // Vista para ingreso de pasaporte
     }
 }

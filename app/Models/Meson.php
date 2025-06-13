@@ -4,8 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Meson extends Model
@@ -16,18 +15,23 @@ class Meson extends Model
     protected $primaryKey = 'id';
     public $timestamps = true;
 
-    protected $fillable = ['nombre', 'estado', 'disponible'];
+    protected $fillable = ['nombre', 'estado', 'disponible', 'funcionario_id'];
 
-    public function servicios(): BelongsToMany
+    // Servicios asignados
+    public function servicios()
     {
         return $this->belongsToMany(Servicio::class, 'meson_servicio', 'meson_id', 'servicio_id');
     }
 
-    public function usuario(): HasOne
+    // Funcionario asignado (usuario con rol funcionario)
+    public function funcionario(): BelongsTo
     {
-        return $this->hasOne(Usuarios::class, 'meson_id');
+        return $this->belongsTo(Usuarios::class, 'funcionario_id', 'id');
     }
 
+    /**
+     * Obtener los turnos asociados a este mesón a través de los usuarios asignados
+     */
     public function turnos(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -40,38 +44,31 @@ class Meson extends Model
         );
     }
 
-    // Mutator para mantener estado sincronizado con disponible
-    public function setDisponibleAttribute($value)
+    // Mutator para estado y disponible basado en funcionario_id
+    public function setFuncionarioIdAttribute($value)
     {
-        $this->attributes['disponible'] = $value;
-        $this->attributes['estado'] = $value ? 'Libre' : 'Ocupado';
+        $this->attributes['funcionario_id'] = $value;
+
+        if ($value !== null) {
+            $this->attributes['disponible'] = false;
+            $this->attributes['estado'] = 'Ocupado';
+        } else {
+            $this->attributes['disponible'] = true;
+            $this->attributes['estado'] = 'Libre';
+        }
     }
 
+    // Asignar mesón a un funcionario
     public function asignarA(Usuarios $user): void
     {
-        if ($prev = $this->usuario) {
-            if ($prev->id !== $user->id) {
-                $prev->meson_id = null;
-                $prev->save();
-            }
-        }
-
-        $user->meson_id = $this->id;
-        $user->save();
-
-        // Aquí basta con cambiar disponible, el mutator actualiza estado
-        $this->disponible = false;
+        $this->funcionario_id = $user->id; // Esto activará el mutator
         $this->save();
     }
 
+    // Liberar mesón
     public function liberar(): void
     {
-        if ($user = $this->usuario) {
-            $user->meson_id = null;
-            $user->save();
-
-            $this->disponible = true;
-            $this->save();
-        }
+        $this->funcionario_id = null; // Esto activará el mutator
+        $this->save();
     }
 }
