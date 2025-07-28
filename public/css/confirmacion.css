@@ -37,7 +37,6 @@
     border: 3px dashed #007bff;
     padding: 15px 0;
     user-select: all;
-    /* para que puedan copiar el código si quieren */
 }
 
 .confirm-card p {
@@ -46,14 +45,38 @@
     margin-bottom: 0;
 }
 
+.ticket-datetime {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.ticket-message {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #000;
+    text-transform: uppercase;
+}
+
+/* ===== Estilos de impresión para ticket ===== */
+
 @media print {
-    body {
-        visibility: visible;
+
+    @page {
+        size: 55mm auto;
+        margin: 0;
     }
 
-    .confirm-wrapper,
-    .confirm-card {
-        visibility: visible;
+    html,
+    body {
+        width: 58mm;
+        margin: 0;
+        padding: 0;
+        font-size: 11px;
+        font-family: 'Courier New', Courier, monospace;
+        color: black;
+        background: white !important;
     }
 
     .confirm-wrapper {
@@ -61,41 +84,56 @@
         box-shadow: none !important;
         padding: 0 !important;
         min-height: auto !important;
+        width: 100% !important;
+        display: block;
     }
 
     .confirm-card {
         border: none !important;
         box-shadow: none !important;
         max-width: 100% !important;
+        width: 100% !important;
         padding: 0 !important;
         border-radius: 0 !important;
     }
 
     .display-code {
         border: none !important;
-        font-size: 4rem !important;
+        font-size: 2.5rem !important;
         color: black !important;
-        letter-spacing: 0.2em !important;
+        letter-spacing: 0.1em !important;
+        margin: 10px 0 !important;
+    }
+
+    .ticket-datetime,
+    .ticket-message {
+        font-size: 0.9rem !important;
+        margin: 5px 0 !important;
+        color: black !important;
+        text-align: center !important;
     }
 
     .qr-container {
-        display: block !important;
         text-align: center;
-        margin-top: 20px;
+        margin-top: 10px !important;
     }
 
     svg {
-        width: 150px;
-        height: 150px;
+        width: 120px !important;
+        height: 120px !important;
         margin: auto;
         display: block;
     }
 
-    .btn,
-    a,
-    button {
-        display: none !important;
-        /* Oculta botones en impresión */
+    p {
+        font-size: 0.9rem !important;
+        margin: 5px 0 !important;
     }
 
+    .btn,
+    a,
+    button,
+    .no-print {
+        display: none !important;
+    }
 }

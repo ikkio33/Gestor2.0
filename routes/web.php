@@ -11,7 +11,6 @@ use App\Http\Controllers\Admin\OrganizadorController;
 use App\Http\Controllers\Funcionario\CentroMandoController;
 use App\Http\Controllers\Admin\AsignacionController;
 use App\Http\Controllers\TurnoEstadoController;
-use App\Http\Controllers\PublicoAjaxController;
 use App\Http\Controllers\ApiTurnoController;
 
 // Autenticación
@@ -29,9 +28,6 @@ Route::get('/turno/{codigo}', [ApiTurnoController::class, 'mostrarPorCodigo']);
 Route::get('turnos/{codigo}', [ApiTurnoController::class, 'mostrarPorCodigo']);
 Route::get('/turno-actual-publico', [TurnoController::class, 'turnoActualPublico']);
 Route::get('/publico/turno-en-atencion', [CentroMandoController::class, 'turnoEnAtencionPublico']);
-
-
-
 
 
 // Totem
@@ -52,12 +48,12 @@ Route::middleware(['auth', 'role:administrador'])
     ->group(function () {
         Route::resource('usuarios', UsuarioController::class);
         Route::get('estadisticas', [EstadisticasController::class, 'index'])->name('estadisticas.index');
+        Route::get('estadisticas/ajax', [EstadisticasController::class, 'obtenerEstadisticasAjax'])->name('estadisticas.ajax');
         Route::resource('mesones', MesonController::class)->except(['show']);
         //rutas para asignacion de mesones a funcionarios
         Route::get('asignaciones', [AsignacionController::class, 'index'])->name('asignaciones.index');
         Route::post('asignaciones', [AsignacionController::class, 'store'])->name('asignaciones.store');
         Route::post('asignaciones/liberar', [AsignacionController::class, 'liberar'])->name('asignaciones.liberar');
-
 
         Route::prefix('organizador')->name('organizador.')->group(function () {
             Route::get('/', [OrganizadorController::class, 'index'])->name('index');
@@ -71,7 +67,6 @@ Route::middleware(['auth', 'role:administrador'])
             Route::get('/turnos-espera/ajax', [TurnoController::class, 'turnosEnEsperaAjax'])->name('turnos.ajax');
             Route::get('/turnos/ajax', [TurnoController::class, 'turnosEnEsperaAjax'])->name('funcionario.turnos.ajax');
             Route::post('/turnos/llamar-ajax', [TurnoController::class, 'llamarAjax'])->name('funcionario.llamar.ajax');
-            // otras rutas...
         });
     });
 
@@ -98,15 +93,7 @@ Route::middleware(['auth'])
 
 
 
-// Nueva vista pública con AJAX
-Route::prefix('nueva')
-    ->name('publico.ajax.')
-    ->controller(PublicoAjaxController::class)
-    ->group(function () {
-        Route::get('/', 'vista')->name('vista');
-        Route::get('/turno-actual', 'turnoActual')->name('turno.actual');
-        Route::get('/turnos-actuales', 'turnosActuales')->name('turnos.actuales');
-    });
+
 
 // Ruta de soporte
 Route::view('/soporte', 'soporte.index')->name('soporte.index');

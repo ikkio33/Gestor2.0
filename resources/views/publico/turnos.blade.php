@@ -62,24 +62,19 @@
     <div class="container py-4" id="contenedor">
         <section>
             <h2 class="mb-3 text-center">Turnos pendientes antes que tú</h2>
+            <section class="mb-4 text-center">
+                <div id="mi-turno-box" class="turnos-list"></div>
+            </section>
+
             <div id="turnos-pendientes" class="d-flex flex-wrap justify-content-center">
                 <div class="text-muted">Cargando pendientes...</div>
             </div>
         </section>
-        <!-- <header class="mb-4 text-center">
-            <h1>Turno Actual</h1>
-            <p class="text-muted">Tu posición y los turnos pendientes en tu servicio</p>
-        </header> -->
 
         <!-- Turno en Atención -->
         <section class="mb-5 text-center">
-            <!-- <h2 class="mb-3">Turnos en Atención</h2> -->
             <div id="turno-en-atencion" class="turnos-list"></div>
         </section>
-
-        <!-- Turnos Pendientes -->
-
-        
     </div>
 
     <script>
@@ -88,6 +83,7 @@
             const codigo = params.get('codigo');
             const letra = codigo ? codigo.charAt(0).toUpperCase() : null;
 
+            const miTurnoBox = document.getElementById('mi-turno-box');
             const contenedor = document.getElementById('contenedor');
             const atencionDiv = document.getElementById('turno-en-atencion');
             const pendientesDiv = document.getElementById('turnos-pendientes');
@@ -103,44 +99,96 @@
                     if (!res.ok) {
                         const errorText = await res.text();
                         console.warn("Error del servidor:", errorText);
-                        contenedor.innerHTML = '';
+                        contenedor.innerHTML = '<div class="alert alert-danger text-center">Error al obtener datos</div>';
+                        atencionDiv.innerHTML = '';
+                        pendientesDiv.innerHTML = '';
                         return;
                     }
 
                     const data = await res.json();
-                    const actual = data.atendiendo;   // Aquí cambio importante
+                    const actual = data.turnos_en_atencion?.[0];
                     const miTurno = data.mi_turno;
+                    const pendientes = data.turnos_anteriores_pendientes || []; // 👈 CORREGIDO
+                    const cantidadPendientes = data.total_pendientes_mismo_servicio ?? pendientes.length;
 
-                    if (!miTurno || !miTurno.codigo_turno.startsWith(letra)) {
-                        contenedor.innerHTML = '';
+                    if (!miTurno) {
+                        contenedor.innerHTML = `
+                        <div class="alert alert-warning text-center">
+                            El turno no está registrado para el día de hoy.
+                        </div>
+                    `;
+                        atencionDiv.innerHTML = '';
+                        pendientesDiv.innerHTML = '';
                         return;
                     }
 
-                    // Mostrar turno en atención como tarjeta
-                    atencionDiv.innerHTML = '';
-                    if (actual && actual.estado === 'atendiendo') {  // Y acá también
-                        atencionDiv.innerHTML = `
-                            <div class="turno-box shadow new-turno">
-                                <div class="d-flex justify-content-center align-items-center flex-nowrap gap-4 overflow-auto">
-                                    <span class="badge bg-primary badge-turno">${actual.codigo_turno}</span>
-                                    <span class="fw-bold text-truncate" style="max-width: 25%; white-space: nowrap;">${actual.servicio.nombre}</span>
-                                    <span class="text-muted d-inline-flex align-items-center">
-                                        <i class="fas fa-desktop me-1"></i> Mesón ${actual.meson.nombre}
-                                    </span>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        atencionDiv.innerHTML = `
-                            <div class="no-turnos-box">
-                                
-                            </div>
-                        `;
+                    if (!miTurno.codigo_turno.startsWith(letra)) {
+                        contenedor.innerHTML = `
+                        <div class="alert alert-danger text-center">
+                            No tienes permiso para ver este turno.
+                        </div>
+                    `;
+                        atencionDiv.innerHTML = '';
+                        pendientesDiv.innerHTML = '';
+                        return;
                     }
 
-                    // Mostrar turnos pendientes
+                    if (['atendido', 'cancelado'].includes(miTurno.estado)) {
+                        contenedor.innerHTML = `
+                        <div class="alert alert-info text-center">
+                            Este turno ya fue atendido o cancelado.
+                        </div>
+                    `;
+                        atencionDiv.innerHTML = '';
+                        pendientesDiv.innerHTML = '';
+                        return;
+                    }
+
+                    if (miTurno.estado === 'atendiendo') {
+                        contenedor.innerHTML = `
+                        <div class="alert alert-success text-center">
+                            Están llamando este número, por favor dirígete al mesón indicado.
+                        </div>
+                    `;
+                    }
+
+                    miTurnoBox.innerHTML = `
+                    <div class="turno-box shadow ${miTurno.estado === 'atendiendo' ? 'new-turno' : ''}">
+                        <h5 class="mb-2">Tu Turno</h5>
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+                            <span class="badge bg-dark badge-turno">${miTurno.codigo_turno}</span>
+                            <span class="fw-semibold">${miTurno.servicio?.nombre ?? 'Servicio desconocido'}</span>
+                            <span class="text-muted">
+                                Estado: <strong>${miTurno.estado.toUpperCase()}</strong>
+                            </span>
+                            ${miTurno.meson?.nombre ? `<span class="text-muted"><i class="fas fa-desktop me-1"></i> Mesón ${miTurno.meson.nombre}</span>` : ''}
+                            <span class="text-muted">
+                                Turnos antes que tú: <strong>${pendientes.length}</strong>
+                            </span>
+                        </div>
+                    </div>
+                `;
+
+                    // Turno en atención
+                    atencionDiv.innerHTML = '';
+                    if (actual && actual.estado === 'atendiendo') {
+                        atencionDiv.innerHTML = `
+                        <div class="turno-box shadow new-turno">
+                            <div class="d-flex justify-content-center align-items-center flex-nowrap gap-4 overflow-auto">
+                                <span class="badge bg-primary badge-turno">${actual.codigo_turno}</span>
+                                <span class="fw-bold text-truncate" style="max-width: 25%; white-space: nowrap;">${actual.servicio.nombre}</span>
+                                <span class="text-muted d-inline-flex align-items-center">
+                                    <i class="fas fa-desktop me-1"></i> Mesón ${actual.meson.nombre}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    } else {
+                        atencionDiv.innerHTML = `<div class="no-turnos-box"></div>`;
+                    }
+
+                    // Turnos pendientes
                     pendientesDiv.innerHTML = '';
-                    const pendientes = data.turnos_delante || [];
                     if (pendientes.length === 0) {
                         pendientesDiv.innerHTML = '<div class="text-muted">No hay turnos anteriores pendientes</div>';
                         return;
@@ -156,6 +204,8 @@
                 } catch (error) {
                     console.error("Error al cargar datos:", error);
                     contenedor.innerHTML = '<div class="alert alert-danger text-center">Error al cargar datos</div>';
+                    atencionDiv.innerHTML = '';
+                    pendientesDiv.innerHTML = '';
                 }
             }
 

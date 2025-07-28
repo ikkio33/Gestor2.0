@@ -1,0 +1,17 @@
+.graficos-container {
+    height: 450px;          /* altura fija, espacio limitado */
+    overflow-y: auto;       /* scroll vertical si hay overflow */
+    padding: 1rem;
+}
+
+.graficos-container .row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas iguales */
+    gap: 1rem;
+}
+
+.graficos-container canvas {
+    width: 100% !important;  /* que el canvas ocupe todo el ancho de su celda */
+    height: 320px !important; /* altura fija para uniformidad, ajusta si quieres */
+    object-fit: contain;
+}

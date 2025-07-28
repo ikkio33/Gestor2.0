@@ -21,9 +21,6 @@
     {{-- Navbar --}}
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
         <div class="container">
-            <a class="navbar-brand" href="{{ route('funcionario.centro-mando') }}">
-                <i class="bi bi-terminal-dash"></i> Centro de Mando
-            </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarFuncionario"
                 aria-controls="navbarFuncionario" aria-expanded="false" aria-label="Toggle navigation">

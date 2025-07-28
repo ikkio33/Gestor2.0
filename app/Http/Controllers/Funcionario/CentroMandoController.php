@@ -79,6 +79,7 @@ class CentroMandoController extends Controller
         $mesonId = $usuario->meson->id;
 
         $turno = Turno::where('estado', 'atendiendo')
+            ->whereDate('created_at', Carbon::today()) // 👈 FILTRO IMPORTANTE
             ->whereHas('usuario.meson', function ($query) use ($mesonId) {
                 $query->where('id', $mesonId);
             })
@@ -104,18 +105,35 @@ class CentroMandoController extends Controller
     }
 
 
-    // Llamar un turno: cambia el estado a "atendiendo"
     public function llamarTurno(Request $request)
     {
         $turno = Turno::findOrFail($request->turno_id);
+        $usuario = Auth::user();
+        $meson = $usuario->meson;
+
+        if (!$meson) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes un mesón asignado.'
+            ], 400);
+        }
+
         $turno->estado = 'atendiendo';
-        $turno->usuario_id = Auth::id(); // ← Asignamos el funcionario que llama
+        $turno->usuario_id = $usuario->id;
+        $turno->meson_id = $meson->id;
+
+        // Tiempo de espera: diferencia entre creación y ahora (inicio atención)
+        if (is_null($turno->tiempo_espera)) {
+            $turno->tiempo_espera = $turno->created_at->diffInSeconds(now());
+        }
+
+        // Guardar marca explícita de inicio de atención
+        $turno->inicio_atencion = now();
+
         $turno->save();
 
         return response()->json(['success' => true]);
     }
-
-    // Rellamar a un turno: útil para efectos visuales/sonoros en el frontend
     // Rellamar un turno: solo actualiza updated_at para marcar nueva llamada
     public function rellamarTurno(Request $request)
     {
@@ -140,12 +158,34 @@ class CentroMandoController extends Controller
         $turno->save();
     }
 
-    // Finalizar la atención de un turno
+    // Finalizar turno: guarda usuario final, y tiempo de atención
     public function finalizarTurno(Request $request)
     {
-        $turno = Turno::findOrFail($request->turno_id);
-        $turno->estado = 'atendido';
-        $turno->save();
+        try {
+            $turno = Turno::findOrFail($request->turno_id);
+
+            // Asignar usuario que finaliza si no estaba asignado
+            if (is_null($turno->usuario_id)) {
+                $turno->usuario_id = Auth::id();
+            }
+
+            $turno->fin_atencion = now();
+
+            // Solo calcula tiempo si inicio_atencion está definido
+            if (is_null($turno->tiempo_atencion) && !is_null($turno->inicio_atencion)) {
+                $turno->tiempo_atencion = $turno->inicio_atencion->diffInSeconds($turno->fin_atencion);
+            }
+
+            $turno->estado = 'atendido';
+            $turno->save();
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function asignarMeson(Request $request)
@@ -164,16 +204,16 @@ class CentroMandoController extends Controller
     public function turnoEnAtencionPublico()
     {
         $turnos = Turno::where('estado', 'atendiendo')
+            ->whereDate('created_at', Carbon::today()) // <-- FILTRAMOS POR DÍA ACTUAL
             ->with(['servicio', 'usuario.meson'])
             ->orderBy('updated_at', 'desc') // los más recientes primero
-            ->take(4) // máximo 4 turnos
+            ->take(10)
             ->get();
 
         if ($turnos->isEmpty()) {
             return response()->json(['turnos' => []]);
         }
 
-        // Formatear turnos
         $turnosFormateados = $turnos->map(function ($turno) {
             return [
                 'id' => $turno->id,
@@ -187,27 +227,5 @@ class CentroMandoController extends Controller
         });
 
         return response()->json(['turnos' => $turnosFormateados]);
-    }
-
-
-    public function turnosEnAtencionPublicoTodos()
-    {
-        $turnos = Turno::where('estado', 'atendiendo')
-            ->with(['servicio', 'usuario.meson'])
-            ->get();
-
-        $resultado = $turnos->map(function ($turno) {
-            return [
-                'id' => $turno->id,
-                'codigo' => $turno->codigo_turno,
-                'nombre_servicio' => $turno->servicio->nombre ?? 'Servicio desconocido',
-                'updated_at' => $turno->updated_at,
-                'meson_nombre' => $turno->usuario && $turno->usuario->meson
-                    ? $turno->usuario->meson->nombre
-                    : 'Mesón desconocido',
-            ];
-        });
-
-        return response()->json(['turnos' => $resultado]);
     }
 }

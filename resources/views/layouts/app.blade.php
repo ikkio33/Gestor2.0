@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestor de Filas</title>
 
+    <!-- Bootstrap y estilos globales -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
+    <!-- Estilos personalizados -->
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    @stack('styles') {{-- Permite inyectar CSS adicional desde las vistas --}}
 </head>
 
-<body>
-    <div class="d-flex" id="wrapper">
+<body style="height: 100vh; overflow: hidden;">
+    <div class="d-flex h-100" id="wrapper">
+        <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header text-center py-4">
                 <div class="logo-container mx-auto">
@@ -37,14 +40,11 @@
                         <i class="bi bi-book me-2"></i>Servicios
                     </a>
                 </li>
-
-                <!-- Nueva entrada para asignar funcionarios a mesones -->
                 <li class="nav-item mb-2">
                     <a class="nav-link" href="{{ route('Admin.asignaciones.index') }}">
                         <i class="bi bi-person-badge me-2"></i>Asignar Funcionario a Mesón
                     </a>
                 </li>
-
                 <li class="nav-item mb-2">
                     <a class="nav-link" href="{{ route('Admin.estadisticas.index') }}">
                         <i class="bi bi-bar-chart me-2"></i>Estadísticas
@@ -61,19 +61,22 @@
             </ul>
         </div>
 
+        <!-- Botón toggle del sidebar -->
         <button id="toggleSidebar" class="toggle-btn">
             <i class="bi bi-list"></i>
         </button>
 
-        <div class="content flex-grow-1">
+        <!-- Contenido principal -->
+        <div class="content flex-grow-1 overflow-auto" style="height: 100vh;">
             <div class="p-3">
                 @yield('content')
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/layout.js') }}"></script>
+    @stack('scripts') {{-- Permite inyectar JS adicional desde las vistas --}}
 </body>
-
 </html>

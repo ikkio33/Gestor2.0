@@ -30,12 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!res.ok) {
                 const errorText = await res.text();
                 console.error(`Error ${res.status}:`, errorText);
+                alert(`Error al procesar la acción: ${errorText}`);
                 throw new Error(`Error en ${url}`);
             }
         } catch (err) {
             console.error(err);
+            alert('Error inesperado. Revisa la consola para más detalles.');
         }
     };
+
 
     const llamarTurno = async (turnoId) => {
         if (hayTurnoEnAtencion) {
@@ -178,5 +181,5 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     actualizarVista();
-    setInterval(actualizarVista, 3000);
+    setInterval(actualizarVista, 1000);
 });

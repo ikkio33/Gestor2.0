@@ -1,151 +1,383 @@
-body {
-    background-color: #f0f2f5;
+/* Estilos generales para el body de la página */
+body.vista-publica {
     margin: 0;
-    font-family: Arial, sans-serif;
-    padding: 0 0.5rem; /* Evitar que el contenido quede pegado en móviles */
+    padding: 0;
+    font-family: 'Inter', Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    color: #fff;
+    position: relative;
+    background: linear-gradient(150deg, #4e84d4 0%, #004080 100%);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fondo con puntos (efecto de circuito) */
+body.vista-publica::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(#00aaff 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.2;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Fondo con líneas (efecto de circuito) */
+body.vista-publica::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background-image: repeating-linear-gradient(135deg,
+            rgba(255, 255, 255, 0.05),
+            rgba(255, 255, 255, 0.05) 1px,
+            transparent 2px,
+            transparent 30px);
+    opacity: 0.8;
+    z-index: 0;
+    pointer-events: none;
+    animation: moveCircuito 60s linear infinite;
+}
+
+/* Asegura que el contenido quede sobre el fondo */
+.zona-superior,
+.zona-inferior,
+.contenedor-principal {
+    position: relative;
+    z-index: 1;
+}
+
+/* Espacio superior/inferior */
+.zona-superior {
+    height: 7%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: transparent;
+    padding: 0.75rem 3rem;
+    box-sizing: border-box;
+}
+
+.zona-inferior {
+    height: 8%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    padding: 0.75rem 1.5rem;
+    box-sizing: border-box;
+}
+
+/* Logos */
+.logo-notaria {
+    max-height: 300px;
+    max-width: 1000px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.logo-gesnot {
+    max-height: 180px;
+    max-width: 250px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+/* Contenido central */
+.contenedor-principal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden;
+    padding: 1.5rem;
+    box-sizing: border-box;
 }
 
 h1 {
     text-align: center;
-    font-size: 2.5rem;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    width: 100%;
+    font-size: clamp(3.5rem, 8vw, 6rem);
+    margin-bottom: 0;
+    margin-top: 2rem;
+    color: #fff;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    position: relative;
 }
 
-.turnos-list {
+/* ESTILOS PARA LAS DOS COLUMNAS DE TURNOS */
+
+#turnos-grid-container {
+    flex: 1;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: row;
     justify-content: center;
-    gap: 1.5rem;
-    padding: 0 1rem;
+    align-items: flex-start;
+    width: 100%;
+    padding: 0 1.5rem;
+    box-sizing: border-box;
+    gap: 2rem;
+    /* REDUCIDO LIGERAMENTE: Espacio entre las columnas */
+    margin-top: 2rem;
+    min-height: 0;
 }
 
+.turnos-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* Distribuye 5 turnos equidistantes */
+    align-items: center;
+    flex: 1;
+    max-width: 45%;
+    height: 100%;
+    gap: 0;
+}
+
+/* ESTILOS PARA DISEÑO DE UNA SOLA COLUMNA */
+
+#turnos-grid-container.single-column-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+#turnos-grid-container.single-column-layout .turnos-column {
+    max-width: 60%;
+    width: 100%;
+    gap: 1.2rem;
+    /* REDUCIDO: Ajusta el gap entre los turnos en la vista de una sola columna */
+}
+
+/* ESTILOS DE LOS ELEMENTOS DE TURNO / MENSAJES */
 .turno-box {
-    flex: 1 1 80%;       /* Base para que intente ocupar 80% */
-    min-width: 90%;     /* No muy pequeño en móviles */
-    max-width: 80vw;      /* No más ancho que 80% del viewport */
+    height: 23%;
+    /* 5 turnos * 16% + espacios = 100% sin scroll */
+    background-color: white;
+    color: #000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-weight: bold;
-    padding: 1.5rem;
-    border-radius: 1.5rem;
-    border: 3px solid #0d6efd;
-    background-color: #ffffff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 2.2rem;
+    border: 4px solid #0d6efd;
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    animation: fadeInUp 0.6s ease;
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+}
+
+
+.turno-box.fadeOut {
+    animation: fadeOutDown 0.5s ease-out forwards;
+}
+
+/* Subdivisión interna del turno */
+.turno-box .info-meson,
+.turno-box .info-servicio,
+.turno-box .info-numero {
+    text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1.5rem;
-    text-align: center;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-
-.turno-box.new-turno {
-    animation: fadeInUp 1s ease;
-}
-
-.turno-box:nth-child(n+7) {
+/* OCULTAR EL NOMBRE DEL SERVICIO */
+.turno-box .info-servicio {
     display: none;
 }
 
-.no-turnos-box {
-    max-width: 600px;
-    margin: 4rem auto;
-    padding: 2rem;
+.turno-box .info-numero {
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+    min-width: 150px;
+    margin-right: 1rem;
+}
+
+.turno-box .info-meson {
+    color: #0d6efd;
+    font-size: clamp(2rem, 5vw, 4rem);
+    flex-grow: 1;
+    text-align: left;
+    line-height: 1;
+}
+
+
+#no-turnos-message,
+.loading-box {
+    max-width: 900px;
+    padding: 3rem;
     border: 2px dashed hsl(208, 8%, 59%);
-    border-radius: 5rem;
+    border-radius: 7.5rem;
     background-color: #ffffff;
     color: #6c757d;
     text-align: center;
-    font-size: 1.8rem;
-    box-shadow: 0 2px 6px hsla(0, 0%, 0%, 0.904);
-    
+    font-size: clamp(2rem, 5vw, 3rem);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    margin-top: auto;
+    margin-bottom: auto;
+    display: none;
 }
 
-.badge-turno {
-    font-size: 1.8rem;
-    padding: 0.8rem 1.5rem;
-    border-radius: 1.5rem;
-    background-color: #0d6efd;
-    color: #fff;
-}
-
+/* Animaciones */
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(40px);
+        transform: translateY(80px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-/* Móviles muy pequeños */
-@media (max-width: 575.98px) {
-    .turnos-list {
+@keyframes fadeOutDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(80px);
+        height: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+
+@keyframes moveCircuito {
+    from {
+        transform: translate(0, 0);
+    }
+
+    to {
+        transform: translate(150px, 150px);
+    }
+}
+
+/* Media Queries responsivo */
+
+@media (max-width: 992px) {
+    #turnos-grid-container {
+        flex-direction: column;
+        align-items: center;
         gap: 1rem;
-        padding: 0 0.5rem;
+        /* REDUCIDO para móvil */
+        margin-top: 1rem;
     }
+
+    .turnos-column {
+        max-width: 90%;
+        gap: 0.6rem;
+        /* REDUCIDO para móvil */
+    }
+
     .turno-box {
-        flex: 1 1 100%;
-        min-width: auto;
-        max-width: 100%;
-        padding: 1rem;
-        font-size: 1.4rem;
+        flex-direction: column;
+        padding: 0.4rem 0.4rem;
+        /* REDUCIDO para móvil */
+        border-radius: 1.5rem;
+        font-size: clamp(1rem, 3vw, 1.8rem);
+        /* REDUCIDO para móvil */
+        gap: 0.3rem;
+    }
+
+    .turno-box .info-numero {
+        margin-right: 0;
+        margin-bottom: 0.3rem;
+        /* REDUCIDO para móvil */
+        padding: clamp(0.4rem, 1.5vw, 0.8rem) clamp(0.6rem, 2vw, 1.2rem);
+        /* REDUCIDO para móvil */
+        font-size: clamp(1.6rem, 4vw, 2.5rem);
+        /* REDUCIDO para móvil */
+        min-width: unset;
+        width: 80%;
+    }
+
+    .turno-box .info-meson {
+        font-size: clamp(1rem, 3vw, 1.8rem);
+        /* REDUCIDO para móvil */
+        text-align: center;
     }
 
     h1 {
-        font-size: 2.5rem;
-        margin-top: 3rem;
-        margin-bottom: 2rem;
+        margin-top: 1rem;
+    }
+
+    #turnos-grid-container.single-column-layout .turnos-column {
+        max-width: 85%;
     }
 }
 
-/* Tablets y pantallas pequeñas */
-@media (min-width: 576px) and (max-width: 767.98px) {
-    .turno-box {
-        flex: 1 1 45%;
-        min-width: 220px;
-        max-width: 100%;
-        font-size: 1.6rem;
+@media (max-width: 575.98px) {
+
+    .zona-superior,
+    .zona-inferior {
+        height: 7%;
+        padding: 0.3rem 1.5rem;
+    }
+
+    .logo-notaria,
+    .logo-gesnot {
+        max-height: 50%;
+    }
+
+    #no-turnos-message,
+    .loading-box {
+        padding: 0.8rem;
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
     }
 }
 
-/* Tablets grandes y laptops */
-@media (min-width: 768px) and (max-width: 991.98px) {
-    .turno-box {
-        font-size: 2rem;
-    }
-}
-
-/* Laptops grandes y pantallas de escritorio */
-@media (min-width: 992px) and (max-width: 1199.98px) {
-    .turno-box {
-        font-size: 2.5rem;
-    }
-}
-
-/* Pantallas grandes */
-@media (min-width: 1200px) and (max-width: 1919.98px) {
-    .turno-box {
-        font-size: 3rem;
-    }
-}
-
-/* Pantallas muy grandes: monitores y TVs 55" para arriba */
 @media (min-width: 1920px) {
-    .turno-box {
-        font-size: 4.5rem;
-        max-width: 600px;
-        padding: 3rem;
-        border-width: 5px;
-        border-radius: 2rem;
+    h1 {
+        margin-top: 3rem;
     }
 
-    h1 {
-        font-size: 6rem;
-        margin-top: 8rem;
-        margin-bottom: 4rem;
+    .turno-box {
+        padding: 0.6rem 1.2rem;
+        /* Ajuste para pantallas grandes */
+        border-width: 5px;
+        border-radius: 2.8rem;
+    }
+
+    .turno-box .info-numero {
+        padding: 1rem 1.8rem;
+        /* Ajuste para pantallas grandes */
+        border-radius: 1.5rem;
+        font-size: clamp(3rem, 7vw, 5rem);
+        /* Ajuste para pantallas grandes */
+    }
+
+    #no-turnos-message,
+    .loading-box {
+        padding: 3.5rem;
+        border-radius: 7rem;
+    }
+
+    #turnos-grid-container.single-column-layout .turnos-column {
+        max-width: 50%;
     }
 }

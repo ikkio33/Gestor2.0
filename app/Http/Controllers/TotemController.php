@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TotemController extends Controller
 {
@@ -108,7 +110,6 @@ class TotemController extends Controller
             $materiasPorServicio[$materia->servicio_id][] = $materia;
         }
 
-        // PASAMOS la variable común "identificacion" para usarla igual en la vista
         return view('totem.seleccionar', [
             'identificacion' => $pasaporte,
             'servicios' => $servicios,
@@ -168,6 +169,8 @@ class TotemController extends Controller
         $nuevoNumero = $maxHoy + 1;
         $codigoTurno = $letra . str_pad($nuevoNumero, 2, '0', STR_PAD_LEFT);
 
+        $tokenSeguridad = Str::random(32);
+
         DB::table('turnos')->insert([
             'codigo_turno'  => $codigoTurno,
             'cliente_id'    => $comparecienteId,
@@ -175,15 +178,19 @@ class TotemController extends Controller
             'servicio_id'   => $data['servicio_id'],
             'materia_id'    => $data['materia_id'] ?? null,
             'estado'        => 'pendiente',
+            'token_qr'      => $tokenSeguridad,
             'created_at'    => now(),
             'updated_at'    => now(),
         ]);
 
+        // Aquí agregamos 'imprimir' => 1 para que dispare la impresión automática
         return redirect()->route('totem.confirmacion', [
-            'codigo' => $codigoTurno,
-            'rut'    => $data['rut'],
+            'codigo'   => $codigoTurno,
+            'rut'      => $data['rut'],
+            'imprimir' => 1,
         ]);
     }
+
 
     public function confirmacion(Request $request)
     {
@@ -280,5 +287,29 @@ class TotemController extends Controller
     public function pasaporte()
     {
         return view('totem.pasaporte'); // Vista para ingreso de pasaporte
+    }
+
+    public function generarPdfTurno($codigo)
+    {
+        $qr = QrCode::size(100)->generate(route('totem.verTurno', $codigo));
+
+        $pdf = Pdf::loadView('totem.ticket_pdf', [
+            'codigo' => $codigo,
+            'qr' => $qr
+        ]);
+
+        return $pdf->stream("turno_{$codigo}.pdf");
+    }
+
+    public function imprimirTicket($codigo)
+    {
+        $qr = QrCode::size(100)->generate(route('totem.verTurno', $codigo));
+
+        $pdf = Pdf::loadView('totem.ticket_pdf', [
+            'codigo' => $codigo,
+            'qr' => $qr
+        ]);
+
+        return $pdf->stream("turno_$codigo.pdf"); // o ->download() si quieres descargar
     }
 }
